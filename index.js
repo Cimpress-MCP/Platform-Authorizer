@@ -45,7 +45,7 @@ module.exports.handler = (event, context, callback) => {
     jwksUri: new URL('/.well-known/jwks.json', authority)
   });
 
-  Promise.promisify(client.getSigningKey, { context: client })(decodedToken.header.kid)
+  return Promise.promisify(client.getSigningKey, { context: client })(decodedToken.header.kid)
     .catch(err => {
       console.log('Error getting signing key.', { kid, err });
       return callback("Unauthorized");
