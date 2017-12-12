@@ -1,0 +1,32 @@
+# serverless.yml
+
+service:
+  name: Platform-Authorization
+
+plugins:
+  - serverless-webpack
+
+custom:
+  stage: ${opt:stage,'develop'}
+
+frameworkVersion: ">=1.0.0 <2.0.0"
+
+provider:
+  name: aws
+  stage: ${self:custom.stage}
+  runtime: nodejs6.10
+  region: eu-west-1
+  stackTags:
+    Role: Authorizer
+    Stage: ${self:custom.stage}
+
+package:
+  exclude:
+    - package.json
+    - event.json
+    - README.md
+
+functions:
+  Authorizer:
+    handler: index.handler
+    description: A custom authorizer suitable for the Mass Customization Platform.
