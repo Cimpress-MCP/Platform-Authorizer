@@ -1,7 +1,8 @@
 'use strict';
 
-const jwt = require('jsonwebtoken');
-const jwksClient = require('jwks-rsa');
+const Promise = require('bluebird');
+const jwt = Promise.promisifyAll(require('jsonwebtoken'));
+const JwksClient = require('jwks-rsa');
 const { URL } = require('url');
 
 module.exports.handler = (event, context, callback) => {
@@ -27,46 +28,48 @@ module.exports.handler = (event, context, callback) => {
     return callback("Unauthorized");
   }
 
-  const authority = event.stageVariables['AUTHORITY'];
+  const {
+    stageVariables: {
+      AUTHORITY: authority,
+      PLATFORM_ID: platformId,
+      CLIENT_ID: clientId,
+    }
+  } = event;
   if (!authority) {
     return callback("No stage variable 'AUTHORITY' is provided.");
   }
 
-  const client = jwksClient({
+  const client = new JwksClient({
     cache: true,
     rateLimit: true,
     jwksUri: new URL('/.well-known/jwks.json', authority)
   });
 
-  client.getSigningKey(decodedToken.header.kid, (err, key) => {
-    if (err) {
+  Promise.promisify(client.getSigningKey, { context: client })(decodedToken.header.kid)
+    .catch(err => {
       console.log('Error getting signing key.', { kid, err });
       return callback("Unauthorized");
-    }
-
-    const signingKey = key.publicKey || key.rsaPublicKey;
-    jwt.verify(encodedToken, signingKey, {
-      audience: [ event.stageVariables['PLATFORM_ID'], event.stageVariables['CLIENT_ID'] ],
+    })
+    .then(key => key.publicKey || key.rsaPublicKey)
+    .then(signingKey => jwt.verify(encodedToken, signingKey, {
+      audience: [ platformId, clientId ],
       issuer: authority
-    }, (err, verified) => {
-      if (err) {
-        console.log("Error verifying token.", { err })
-        return callback("Unauthorized");
+    }))
+    .catch(err => {
+      console.log('Error verifying token.', { err });
+      return callback("Unauthorized");
+    })
+    .then(verified => callback(null, {
+      principalId: verified.sub,
+      policyDocument: {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Action: 'execute-api:Invoke',
+            Effect: 'Allow',
+            Resource: event.methodArn
+          }
+        ]
       }
-
-      return callback(null, {
-        principalId: verified.sub,
-        policyDocument: {
-          Version: '2012-10-17',
-          Statement: [
-            {
-              Action: 'execute-api:Invoke',
-              Effect: 'Allow',
-              Resource: event.methodArn
-            }
-          ]
-        }
-      })
-    });
-  });
+    }));
 };
