@@ -17,14 +17,7 @@ provider:
   runtime: nodejs6.10
   region: eu-west-1
   stackTags:
-    Role: Authorizer
-    Stage: ${self:custom.stage}
-
-package:
-  exclude:
-    - package.json
-    - event.json
-    - README.md
+    role: Authorizer
 
 functions:
   Authorizer:

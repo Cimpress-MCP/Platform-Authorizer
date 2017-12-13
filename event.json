@@ -1,12 +1,5 @@
 {
-  "type": "REQUEST",
-  "headers": {
-    "Authorization": "Bearer <TOKEN>"
-  },
-  "methodArn": "arn:aws:execute-api:us-east-1:1234567890:apiId/stage/method/resourcePath",
-  "stageVariables": {
-    "AUTHORITY": "https://cimpress.auth0.com/",
-    "CLIENT_ID": "<CLIENT_ID>",
-    "PLATFORM_ID": "https://api.cimpress.io/"
-  }
+  "type": "TOKEN",
+  "authorizationToken": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik1qbENNemxCTnpneE1ETkJSVFpHTURFd09ETkRSalJGTlRSR04wTXpPRUpETnpORlFrUTROUSJ9.eyJodHRwczovL2NsYWltcy5jaW1wcmVzcy5pby9jaW1wcmVzc19pbnRlcm5hbCI6dHJ1ZSwiaXNzIjoiaHR0cHM6Ly9jaW1wcmVzcy5hdXRoMC5jb20vIiwic3ViIjoiYWRmc3xjb3Nib3JuQGNpbXByZXNzLmNvbSIsImF1ZCI6WyJodHRwczovL2FwaS5jaW1wcmVzcy5pby8iLCJodHRwczovL2NpbXByZXNzLmF1dGgwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE1MTMxNzkyMzQsImV4cCI6MTUxMzE5MzYzNCwiYXpwIjoieDMyM3RCSDZwSFQ0NGh6Q3F1NGpTODZJNnhpZUxmbGwiLCJzY29wZSI6Im9wZW5pZCJ9.xd2Bm0AqIxXwVf4GB7Ez_jRQbGJSq8Jd7T466ZE3UlVD4tE11jqAf_6lyDbtqEN66lRCNLttH5pJ_sUY2fjVRR3O87FYo3G3X49ulXMyyqDN5OonutpA_5pi1eYLSr2dGFZTJYMbZrHirwiAuQyCvPDEVXNUKIP37qJ1X-AlNLR3cUk-uo2zdSk5CeaKPmZbudbg2cvrTLgmN2J-rqj4GtRKFnlUQmJYps3MQm5rTp5VZNNs2EOXzI1kxVB2e_QBALLrU8TkT4j1j8dESHJpO8H8bV4qFfF1eDFw3KdO1x4UUttF_77ySsx4pTqkNiqclV80W79qXuBpHG9R-De38Q",
+  "methodArn": "arn:aws:execute-api:us-east-1:1234567890:apiId/stage/method/resourcePath"
 }

@@ -2,65 +2,48 @@
 
 const Promise = require('bluebird');
 const jwt = Promise.promisifyAll(require('jsonwebtoken'));
-const JwksClient = require('jwks-rsa');
+const jwks = require('jwks-rsa');
 const { URL } = require('url');
+const AUTHORITY = 'https://cimpress.auth0.com/';
 
 module.exports.handler = (event, context, callback) => {
-  if (!event.type || event.type !== 'REQUEST') { // note(cosborn) Configuration check.
-    return callback("This authorizer is not configured as a 'REQUEST' authorizer.");
+  if (event.type !== 'TOKEN') { // note(cosborn) Configuration check.
+    return callback("This authorizer is not configured as a 'TOKEN' authorizer.");
   }
 
-  const {
-    stageVariables: {
-      AUTHORITY: authority,
-      PLATFORM_ID: platformId,
-      CLIENT_ID: clientId,
-    }
-  } = event;
-  if (!authority) {
-    return callback("No stage variable 'AUTHORITY' is provided.");
-  }
-
-  const authToken = event.headers['authorization'] || event.headers['Authorization'];
-  if (!authToken) { // note(cosborn) The configuration of the authorizer should handle this but why not
+  var { authorizationToken } = event;
+  if (!authorizationToken) { // note(cosborn) The configuration of the authorizer should handle this but sure why not
     return callback("No header 'Authorization' is provided.")
   }
 
-  const match = authToken.match(/^Bearer (.*)$/);
-  if (!match || match.length < 2) {
-    console.log("Value for header 'Authorization' is malformed.", { authToken });
-    return callback('Unauthorized');
-  }
-
-  const [, encodedToken] = match;
+  const [, encodedToken] = authorizationToken.match(/^Bearer (.*)$/); // note(cosborn) Should also be handled by config.
   const decodedToken = jwt.decode(encodedToken, { complete: true });
   if (!decodedToken) {
-    console.log('Authorization token could not be decoded.', { encodedToken });
+    console.log('Authorization token could not be decoded.', { authorizationToken });
     return callback('Unauthorized');
   }
 
-  const client = new JwksClient({
+  const { header: { kid } = { } } = decodedToken;
+  if (!kid) {
+    console.log("No 'kid' found in token header.", { header: decodedToken.header });
+    callback('Unauthorized');
+  }
+
+  const jwksUri = new URL('/.well-known/jwks.json', AUTHORITY);
+  const client = Promise.promisifyAll(jwks({
     cache: true,
     rateLimit: true,
-    jwksUri: new URL('/.well-known/jwks.json', authority)
-  });
+    jwksUri
+  }));
 
-  return Promise.promisify(client.getSigningKey, { context: client })(decodedToken.header.kid)
-    .catch(err => {
-      console.log('Error getting signing key.', { kid, err });
-      return callback('Unauthorized');
-    })
+  return client.getSigningKeyAsync(kid)
     .then(key => key.publicKey || key.rsaPublicKey)
-    .then(signingKey => jwt.verify(encodedToken, signingKey, {
-      audience: [ platformId, clientId ],
-      issuer: authority
+    .then(key => jwt.verifyAsync(encodedToken, key, {
+      audience: 'https://api.cimpress.io/',
+      issuer: AUTHORITY
     }))
-    .catch(err => {
-      console.log('Error verifying token.', { err });
-      return callback('Unauthorized');
-    })
-    .then(verified => callback(null, {
-      principalId: verified.sub,
+    .then(({ sub, scope }) => ({
+      principalId: sub,
       policyDocument: {
         Version: '2012-10-17',
         Statement: [
@@ -70,6 +53,14 @@ module.exports.handler = (event, context, callback) => {
             Resource: event.methodArn
           }
         ]
-      }
-    }));
+      },
+      context: { scope }
+    }))
+    .then(resp => callback(null, resp))
+    .tapCatch(jwks.SigningKeyNotFoundError, err => console.log("Could not retrieve signing key from 'kid'.", { kid, err }))
+    .tapCatch(jwks.JwksError, err => console.log('An error occurred in retrieving a JWKS.', { jwksUri, err }))
+    .tapCatch(jwks.JwksRateLimitError, err => console.log('The JWKS endpoint is rate-limited.', { err }))
+    .tapCatch(jwt.TokenExpiredError, err => console.log('The provided token has expired.', { err }))
+    .tapCatch(jwt.JsonWebTokenError, err => console.log('The provided token was not valid.', { err }))
+    .catch(_ => callback('Unauthorized'));
 };
