@@ -55,7 +55,7 @@ For a service using HTTP integration, the context variable `authorizer.principal
 
 ## How to Develop It
 
-This project is written in JavaScript, and primarily uses Node and the Serverless framework as its development tools.
+This project is written in JavaScript, and primarily uses Node and the Serverless framework as its development tools. If you're already familiar with these tools, go to town! Otherwise, here is a _very_ brief overview.
 
 To begin development, ensure that you have Node and Yarn installed. Install the project's dependencies:
 
