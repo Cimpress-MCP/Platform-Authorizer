@@ -13,7 +13,7 @@ It can be complex to get authentication working for a microservice on the MCP. T
 This authorizer is somewhat configurable, and the nature of API Gateway means that the configuration happens at the use site – that is, in the template defining the service using the authorizer.
 
 - Platform Authorizer must be configured as the 'TOKEN' flavor of authorizer. (This is the default.)
-  - The identity validation expression should be `/^Bearer [-0-9a-zA-Z\._]*$/`. This allows a request with an malformed `Authorization` header to be failed without invoking even the authorizer.
+  - The identity validation expression should be `/^Bearer [-0-9a-zA-Z\._]*$/`. This allows a request with a malformed `Authorization` header to be failed without invoking even the authorizer.
   - The TTL on the authorization should be set reasonably. 3600 is a reasonable value, for example.
 - A 401 `UNAUTHORIZED` Gateway Response is recommended, so that response headers can be set correctly.
 
