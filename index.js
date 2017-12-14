@@ -50,7 +50,7 @@ export async function handler({ type: eventType, authorizationToken: token, meth
   }
 
   if (!token) { // note(cosborn) The configuration of the authorizer should handle this but sure why not
-    return callback("No header 'Authorization' is provided.");
+    return callback('Unauthorized');
   }
 
   const [, tokenValue] = token.match(/^Bearer (.*)$/) || []; // note(cosborn) Should also be handled by config.
