@@ -2,18 +2,18 @@
 
 ## What It Is
 
-authorize... customly
+Platform-Authorization is a custom authorizer intended to be used with AWS's API Gateway. API Gateway can use authorizers implemented as Lambda Functions to check authentication and authorization of a request before it passes through the gateway. This custom authorizer is meant for use with the Cimpress Mass Customization Platform, and is configured and customized for that.
 
 ## Why You Want It
 
-don't duplicate auth work
+It can be complex to get authentication working for a microservice on the MCP. There are a lot of fiddly little bits to implement in order to ensure that clients' off-the-shelf libraries can work in an automated fashion. Even when these bits are integrated into a development workflow, the difficulty of doing it again for other technologies can begin to entrench a team in their preferred technology stack. Even more, any developers who venture into lesser-known microservice frameworks can find themselves stymied by lack of JWT libraries or even lack of usable crypro libraries for the framework, language, or ecosystem.
 
 ## How to Use It
 
 This authorizer is somewhat configurable, and the nature of API Gateway means that the configuration happens at the use site – that is, in the template defining the service using the authorizer.
 
 - Platform Authorizer must be configured as the 'TOKEN' flavor of authorizer. (This is the default.)
-  - The identity validation expression should be `/^Bearer [-0-9a-zA-Z\._]*$/`. This allows a request with an malformed `Authorization` header to be failed without invoking the authorizer.
+  - The identity validation expression should be `/^Bearer [-0-9a-zA-Z\._]*$/`. This allows a request with an malformed `Authorization` header to be failed without invoking even the authorizer.
   - The TTL on the authorization should be set reasonably. 3600 is a reasonable value, for example.
 - A 401 `UNAUTHORIZED` Gateway Response is recommended, so that response headers can be set correctly.
 
@@ -57,10 +57,10 @@ For a service using HTTP integration, the context variable `authorizer.principal
 
 This project is written in JavaScript, and primarily uses Node and the Serverless framework as its development tools.
 
-To begin development, ensure that you have Node (a version compatible with 6.10) and NPM installed. Install the project's dependencies:
+To begin development, ensure that you have Node and Yarn installed. Install the project's dependencies:
 
 ```bash
-npm install
+yarn install
 ```
 
 To build the project and test it locally, ensure that the file "event.json" has had its metasyntatic variable substituted:

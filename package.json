@@ -9,14 +9,45 @@
     "name": "Fulfiller Enablement",
     "email": "fulfillerenablement@cimpress.com"
   },
+  "babel": {
+    "plugins": [
+      [
+        "transform-runtime",
+        {
+          "polyfill": false,
+          "regenerator": true
+        }
+      ]
+    ],
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "node": "6.10"
+          }
+        }
+      ]
+    ]
+  },
   "dependencies": {
     "bluebird": "^3.5.1",
     "jsonwebtoken": "^8.1.0",
     "jwks-rsa": "^1.2.1"
   },
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.0.3",
+    "babel-loader": "^7.1.2",
+    "babel-minify-webpack-plugin": "^0.2.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.13.1",
+    "eslint-config-defaults": "^9.0.0",
+    "eslint-loader": "^1.9.0",
+    "eslint-plugin-react": "^7.5.1",
     "serverless-webpack": "^4.1.0",
-    "uglifyjs-webpack-plugin": "^1.1.2",
     "webpack": "^3.10.0"
   }
 }
