@@ -42,7 +42,8 @@ resources:
         StatusCode: '401'
         ResponseType: UNAUTHORIZED
         ResponseTemplates:
-          application/json: {"message":$context.error.messageString}
+          application/json: >
+            {"message":$context.error.messageString}
         ResponseParameters:
           gatewayresponse.header.WWW-Authenticate: >-
             'Bearer realm="https://api.cimpress.io/", authorization_uri="https://cimpress.auth0.com/oauth/token"'
