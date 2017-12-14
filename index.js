@@ -11,6 +11,12 @@ import JwksClient from 'jwks-rsa';
 import { resolve } from 'url';
 
 const AUTHORITY = 'https://cimpress.auth0.com/';
+const jwksUri = resolve(AUTHORITY, '/.well-known/jwks.json');
+const client = promisifyAll(new JwksClient({
+  cache: true,
+  rateLimit: true,
+  jwksUri
+}));
 
 /**
  * A callback indicating success or failure to the calling entity.
@@ -59,13 +65,6 @@ export async function handler({ type: eventType, authorizationToken: token, meth
     console.log("No 'kid' found in token header.", { header: decoded.header });
     return callback('Unauthorized');
   }
-
-  const jwksUri = resolve(AUTHORITY, '/.well-known/jwks.json');
-  const client = promisifyAll(new JwksClient({
-    cache: true,
-    rateLimit: true,
-    jwksUri
-  }));
 
   try {
     const key = await client.getSigningKeyAsync(kid)
