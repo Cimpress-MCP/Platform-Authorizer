@@ -16,15 +16,6 @@ setup:
     paths:
       - node_modules/
 
-build:
-  stage: build
-  script:
-    - sls package -s $CI_ENVIRONMENT_NAME
-  artifacts:
-    paths:
-      - node_modules/
-      - .serverless/
-
 .deploy_template: &deploy_definition
   stage: deploy
   script:
@@ -34,12 +25,10 @@ deploy_develop:
   <<: *deploy_definition
   environment:
     name: develop
-  only:
-    - develop
+  when: manual
 
 deploy_master:
   <<: *deploy_definition
   environment:
     name: master
-  only:
-    - master
+  when: manual
