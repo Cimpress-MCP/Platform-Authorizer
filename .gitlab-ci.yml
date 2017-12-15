@@ -26,15 +26,15 @@ build:
   script:
     - sls deploy -s $CI_ENVIRONMENT_NAME
 
-deploy_develop:
+deploy_unstable:
   <<: *deploy_definition
   environment:
-    name: develop
+    name: unstable
   only:
-    - develop
+    - master
 
-deploy_master:
+deploy_public:
   <<: *deploy_definition
   environment:
-    name: master
+    name: public
   when: manual
