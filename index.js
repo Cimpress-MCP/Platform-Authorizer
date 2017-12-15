@@ -3,7 +3,7 @@
  * @copyright 2017 Cimpress, Inc.
  */
 
- 'use strict';
+'use strict';
 
 import { promisifyAll } from 'bluebird';
 const { decode, verifyAsync } = promisifyAll(require('jsonwebtoken'));
@@ -20,15 +20,16 @@ const client = promisifyAll(new JwksClient({
 
 /**
  * A callback indicating success or failure to the calling entity.
- * 
+ *
  * @callback eventCallback
  * @param {string} failure - A description of the failure.
  * @param {Object} success - An API Gateway authorizer response document.
+ * @returns {void}
  */
 
  /**
  * An event indicating a request coming into API Gateway that requires authorization.
- * 
+ *
  * @typedef {Object} ApiGatewayAuthorizationEvent
  * @property {!string} type - The type of authorization that has been requested.
  * @property {!string} authorizationToken - The token to be checked for authentication.
@@ -37,12 +38,13 @@ const client = promisifyAll(new JwksClient({
 
 /**
  * Performs JWT Bearer authentication, and calls the provided callback.
- * 
+ *
+ * @async
  * @function handler
  * @param {!ApiGatewayAuthorizationEvent} event - The event that caused this function to be invoked.
  * @param {!Object} context - The context associated with the event.
  * @param {!eventCallback} callback - A function that will be called when authentication succeeds or fails.
- * @returns {!Promise} - A promise which, when resolved, signals the result of authorization.
+ * @returns {!Promise.<void>} - A promise which, when resolved, signals the result of authorization.
  */
 export async function handler({ type: eventType, authorizationToken: token, methodArn }, context, callback) {
   if (eventType !== 'TOKEN') { // note(cosborn) Configuration check.

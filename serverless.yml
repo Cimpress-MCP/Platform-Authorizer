@@ -1,17 +1,25 @@
-# serverless.yml
-
 service:
   name: Platform-Authorization
 
+frameworkVersion: ">=1.0.0 <2.0.0"
+
 plugins:
   - serverless-webpack
-
-frameworkVersion: ">=1.0.0 <2.0.0"
+  - serverless-plugin-tracing
 
 provider:
   name: aws
   runtime: nodejs6.10
   region: eu-west-1
+  tracing: true
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'xray:PutTraceSegments'
+        - 'xray:PutTelemetryRecords'
+      Resource:
+        - '*'
+
   stackTags:
     role: Authorizer
 

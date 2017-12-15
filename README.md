@@ -47,6 +47,8 @@ resources:
         ResponseParameters:
           gatewayresponse.header.WWW-Authenticate: >-
             'Bearer realm="https://api.cimpress.io/", authorization_uri="https://cimpress.auth0.com/oauth/token"'
+          gatewayresponse.header.Link: >-
+            '<https://cimpress.auth0.com/oauth/token>;rel=authorization_uri'
         RestApiId:
           Ref: 'ApiGatewayRestApi'
 …
