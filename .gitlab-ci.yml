@@ -1,17 +1,29 @@
 image: amaysim/serverless:1.24.0
 
+stages:
+  - setup
+  - build
+  - deploy
+
 cache:
   key: "$CI_PIPELINE_ID"
-  paths:
-  - node_modules/
 
-before_script:
-  - yarn install
+setup:
+  stage: setup
+  script:
+    - yarn install
+  artifacts:
+    paths:
+      - node_modules/
 
 build:
   stage: build
   script:
-    - sls package
+    - sls package -s $CI_ENVIRONMENT_NAME
+  artifacts:
+    paths:
+      - node_modules/
+      - .serverless/
 
 .deploy_template: &deploy_definition
   stage: deploy
@@ -25,7 +37,7 @@ deploy_develop:
   only:
     - develop
 
-deploy_develop:
+deploy_master:
   <<: *deploy_definition
   environment:
     name: master

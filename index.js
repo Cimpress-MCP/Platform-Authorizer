@@ -3,31 +3,34 @@
  * @copyright 2017 Cimpress, Inc.
  */
 
-'use strict';
+'use strict'
 
-import { promisifyAll } from 'bluebird';
-const { decode, verifyAsync } = promisifyAll(require('jsonwebtoken'));
-import JwksClient from 'jwks-rsa';
-import { resolve } from 'url';
+import { promisifyAll } from 'bluebird'
+import JwksClient from 'jwks-rsa'
+import { resolve } from 'url'
 
-const AUTHORITY = 'https://cimpress.auth0.com/';
-const jwksUri = resolve(AUTHORITY, '/.well-known/jwks.json');
+const MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authorizer."
+const UNAUTHORIZED = new Error('Unauthorized')
+const AUTHORITY = 'https://cimpress.auth0.com/'
+
+const jwksUri = resolve(AUTHORITY, '/.well-known/jwks.json')
 const client = promisifyAll(new JwksClient({
   cache: true,
   rateLimit: true,
   jwksUri
-}));
+}))
+const { decode, verifyAsync } = promisifyAll(require('jsonwebtoken'))
 
 /**
  * A callback indicating success or failure to the calling entity.
  *
  * @callback eventCallback
- * @param {string} failure - A description of the failure.
+ * @param {string|Error} failure - A description of the failure.
  * @param {Object} success - An API Gateway authorizer response document.
  * @returns {void}
  */
 
- /**
+/**
  * An event indicating a request coming into API Gateway that requires authorization.
  *
  * @typedef {Object} ApiGatewayAuthorizationEvent
@@ -46,35 +49,35 @@ const client = promisifyAll(new JwksClient({
  * @param {!eventCallback} callback - A function that will be called when authentication succeeds or fails.
  * @returns {!Promise.<void>} - A promise which, when resolved, signals the result of authorization.
  */
-export async function handler({ type: eventType, authorizationToken: token, methodArn }, context, callback) {
+export async function handler ({ type: eventType, authorizationToken: token, methodArn }, context, callback) {
   if (eventType !== 'TOKEN') { // note(cosborn) Configuration check.
-    return callback("This authorizer is not configured as a 'TOKEN' authorizer.");
+    return callback(MISCONFIGURATION)
   }
 
   if (!token) { // note(cosborn) The configuration of the authorizer should handle this but sure why not
-    return callback('Unauthorized');
+    return callback(UNAUTHORIZED)
   }
 
-  const [, tokenValue] = token.match(/^Bearer (.*)$/) || []; // note(cosborn) Should also be handled by config.
-  const decoded = decode(tokenValue, { complete: true });
+  const [, tokenValue] = token.match(/^Bearer (.*)$/) || [] // note(cosborn) Should also be handled by config.
+  const decoded = decode(tokenValue, { complete: true })
   if (!decoded) {
-    console.log('Authorization token could not be decoded.', { token });
-    return callback('Unauthorized');
+    console.log('Authorization token could not be decoded.', { token })
+    return callback(UNAUTHORIZED)
   }
 
-  const { header: { kid } = { } } = decoded;
+  const { header: { kid } = { } } = decoded
   if (!kid) {
-    console.log("No 'kid' found in token header.", { header: decoded.header });
-    return callback('Unauthorized');
+    console.log("No 'kid' found in token header.", { header: decoded.header })
+    return callback(UNAUTHORIZED)
   }
 
   try {
     const key = await client.getSigningKeyAsync(kid)
-      .then(({ publicKey, rsaPublicKey }) => publicKey || rsaPublicKey);
+      .then(({ publicKey, rsaPublicKey }) => publicKey || rsaPublicKey)
     const { sub, scope } = await verifyAsync(tokenValue, key, {
       audience: 'https://api.cimpress.io/',
       issuer: AUTHORITY
-    });
+    })
     const resp = {
       principalId: sub,
       policyDocument: {
@@ -88,10 +91,10 @@ export async function handler({ type: eventType, authorizationToken: token, meth
         ]
       },
       context: { scope }
-    };
-    return callback(null, resp);
+    }
+    return callback(null, resp)
   } catch (err) {
-    console.log('An error occurred validating the token.', { jwksUri, kid, err });
-    return callback('Unauthorized');
+    console.log('An error occurred validating the token.', { jwksUri, kid, err })
+    return callback(UNAUTHORIZED)
   }
 }

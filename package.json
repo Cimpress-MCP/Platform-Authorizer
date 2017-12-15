@@ -1,5 +1,5 @@
 {
-  "name": "jwt-custom-authorizer",
+  "name": "platform-authorizer",
   "version": "0.2.0",
   "license": "UNLICENSED",
   "private": true,
@@ -45,8 +45,13 @@
     "babel-preset-env": "^1.6.1",
     "eslint": "^4.13.1",
     "eslint-config-defaults": "^9.0.0",
+    "eslint-config-standard": "^11.0.0-beta.0",
     "eslint-loader": "^1.9.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-react": "^7.5.1",
+    "eslint-plugin-standard": "^3.0.1",
     "serverless-plugin-tracing": "^2.0.0",
     "serverless-webpack": "^4.1.0",
     "webpack": "^3.10.0"

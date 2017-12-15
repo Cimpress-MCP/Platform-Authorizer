@@ -10,10 +10,13 @@
       "**/.DS_Store": true,
       "node_modules/": true,
       ".serverless/": true,
+      ".webpack/": true,
       "*.code-workspace": true,
       "yarn.lock": true,
       ".editorconfig": true,
-      ".gitignore": true
+      ".gitignore": true,
+      ".gitlab-ci.yml": true,
+      ".eslintrc.*": true
     }
   }
 }
