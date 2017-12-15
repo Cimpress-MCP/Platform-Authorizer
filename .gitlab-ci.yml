@@ -25,13 +25,13 @@ build:
   stage: deploy
   script:
     - sls deploy -s $CI_ENVIRONMENT_NAME
+  only:
+    - master
 
 deploy_unstable:
   <<: *deploy_definition
   environment:
     name: unstable
-  only:
-    - master
 
 deploy_public:
   <<: *deploy_definition
