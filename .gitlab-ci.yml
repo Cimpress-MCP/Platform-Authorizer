@@ -16,16 +16,22 @@ setup:
     paths:
       - node_modules/
 
+build:
+  stage: build
+  script:
+    - sls package -s build
+
 .deploy_template: &deploy_definition
   stage: deploy
   script:
-    sls deploy -s $CI_ENVIRONMENT_NAME
+    - sls deploy -s $CI_ENVIRONMENT_NAME
 
 deploy_develop:
   <<: *deploy_definition
   environment:
     name: develop
-  when: manual
+  only:
+    - develop
 
 deploy_master:
   <<: *deploy_definition
