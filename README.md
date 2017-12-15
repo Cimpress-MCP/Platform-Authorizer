@@ -30,7 +30,7 @@ functions:
           path: routeRequest
           method: post
           authorizer:
-            arn: arn:aws:lambda:eu-west-1:820870426321:function:Platform-Authorization-master-Authorizer
+            arn: arn:aws:lambda:eu-west-1:820870426321:function:Platform-Authorization-public-Authorizer
             identityValidationExpression: ^Bearer [-0-9a-zA-Z\._]*$
             resultTtlInSeconds: 3600
 
