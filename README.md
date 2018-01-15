@@ -14,7 +14,7 @@ This authorizer is somewhat configurable, and the nature of API Gateway means th
 
 - Platform Authorizer must be configured as the 'TOKEN' flavor of authorizer. (This is the default.)
   - The identity validation expression should be `/^Bearer [-0-9a-zA-Z\._]*$/`. This allows a request with a malformed `Authorization` header to be failed without invoking even the authorizer.
-  - The TTL on the authorization should be set reasonably. 3600 is a reasonable value, for example.
+  - The TTL on the authorization should be set to 0. Authentication caching is not yet supported.
 - A 401 `UNAUTHORIZED` Gateway Response is recommended, so that response headers can be set correctly.
 
 None of these requirements are particularly complicated, and can be configured via CloudFormation or Serverless templates.
@@ -25,6 +25,7 @@ Here is an excerpt from an example Serverless template:
 functions:
   routeRequest:
     name: request-router
+    handler: handler.routeRequest
     events:
       - http:
           path: routeRequest
@@ -32,7 +33,7 @@ functions:
           authorizer:
             arn: arn:aws:lambda:eu-west-1:820870426321:function:Platform-Authorization-public-Authorizer
             identityValidationExpression: ^Bearer [-0-9a-zA-Z\._]*$
-            resultTtlInSeconds: 3600
+            resultTtlInSeconds: 0
 
 resources:
   Resources:
