@@ -11,7 +11,8 @@ provider:
   name: aws
   runtime: nodejs6.10
   region: eu-west-1
-  tracing: true
+  versionFunctions: false # Otherwise, deployments would disable every service using this!
+  tracing: true # This is X-Ray.
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
@@ -19,7 +20,6 @@ provider:
         - 'xray:PutTelemetryRecords'
       Resource:
         - '*'
-
   stackTags:
     role: Authorizer
 

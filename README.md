@@ -13,8 +13,7 @@ It can be complex to get authentication working for a microservice on the MCP. T
 This authorizer is somewhat configurable, and the nature of API Gateway means that the configuration happens at the use site – that is, in the template defining the service using the authorizer.
 
 - Platform Authorizer must be configured as the 'TOKEN' flavor of authorizer. (This is the default.)
-  - The identity validation expression should be `/^Bearer [-0-9a-zA-Z\._]*$/`. This allows a request with a malformed `Authorization` header to be failed without invoking even the authorizer.
-  - The TTL on the authorization should be set to 0. Authentication caching is not yet supported.
+  - The identity validation expression (`identityValidationExpression`) should be `/^Bearer [-0-9a-zA-Z\._]*$/`. This allows a request with a malformed `Authorization` header to be failed without invoking even the authorizer.
 - A 401 `UNAUTHORIZED` Gateway Response is recommended, so that response headers can be set correctly.
 
 None of these requirements are particularly complicated, and can be configured via CloudFormation or Serverless templates.
@@ -22,6 +21,11 @@ Here is an excerpt from an example Serverless template:
 
 ```yaml
 …
+custom:
+  <<: &authorizer # This can be repetitive if you have many functions, so use the YAML "anchor" feature.
+    arn: arn:aws:lambda:eu-west-1:820870426321:function:Platform-Authorization-public-Authorizer
+    identityValidationExpression: ^Bearer [-0-9a-zA-Z\._]*$
+
 functions:
   routeRequest:
     name: request-router
@@ -29,11 +33,8 @@ functions:
     events:
       - http:
           path: routeRequest
-          method: post
-          authorizer:
-            arn: arn:aws:lambda:eu-west-1:820870426321:function:Platform-Authorization-public-Authorizer
-            identityValidationExpression: ^Bearer [-0-9a-zA-Z\._]*$
-            resultTtlInSeconds: 0
+          method: POST
+          authorizer: *authorizer
 
 resources:
   Resources:

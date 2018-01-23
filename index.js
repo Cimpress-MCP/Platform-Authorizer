@@ -49,7 +49,7 @@ const { decode, verifyAsync } = promisifyAll(require('jsonwebtoken'))
  * @param {!eventCallback} callback - A function that will be called when authentication succeeds or fails.
  * @returns {!Promise.<void>} - A promise which, when resolved, signals the result of authorization.
  */
-export async function handler ({ type: eventType, authorizationToken: token, methodArn }, context, callback) {
+export async function handler ({ type: eventType, authorizationToken: token }, context, callback) {
   if (eventType !== 'TOKEN') { // note(cosborn) Configuration check.
     return callback(MISCONFIGURATION)
   }
@@ -86,7 +86,8 @@ export async function handler ({ type: eventType, authorizationToken: token, met
           {
             Action: 'execute-api:Invoke',
             Effect: 'Allow',
-            Resource: methodArn
+            // note(cosborn) Tokens are valid for the whole platform, so this doesn't need to be restrictive.
+            Resource: 'arn:aws:execute-api:*:*:*/*/*'
           }
         ]
       },
