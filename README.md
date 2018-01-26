@@ -14,7 +14,8 @@ This authorizer is somewhat configurable, and the nature of API Gateway means th
 
 - Platform Authorizer must be configured as the 'TOKEN' flavor of authorizer. (This is the default.)
   - The identity validation expression (`identityValidationExpression`) should be `/^Bearer [-0-9a-zA-Z\._]*$/`. This allows a request with a malformed `Authorization` header to be failed without invoking even the authorizer.
-- A 401 `UNAUTHORIZED` Gateway Response is recommended, so that response headers can be set correctly.
+- A 401 `UNAUTHORIZED` Gateway Response is recommended, so that response authorization headers can be set correctly.
+  - Don't forget response CORS headers, as well.
 
 None of these requirements are particularly complicated, and can be configured via CloudFormation or Serverless templates.
 Here is an excerpt from an example Serverless template:
@@ -51,6 +52,9 @@ resources:
             'Bearer realm="https://api.cimpress.io/", authorization_uri="https://cimpress.auth0.com/oauth/token"'
           gatewayresponse.header.Link: >-
             '<https://cimpress.auth0.com/oauth/token>;rel=authorization_uri'
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+          gatewayresponse.header.Access-Control-Expose-Headers: "'WWW-Authenticate,Link'"
         RestApiId:
           Ref: 'ApiGatewayRestApi'
 …
