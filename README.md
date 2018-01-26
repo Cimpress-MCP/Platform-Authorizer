@@ -53,7 +53,6 @@ resources:
           gatewayresponse.header.Link: >-
             '<https://cimpress.auth0.com/oauth/token>;rel=authorization_uri'
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
           gatewayresponse.header.Access-Control-Expose-Headers: "'WWW-Authenticate,Link'"
         RestApiId:
           Ref: 'ApiGatewayRestApi'
