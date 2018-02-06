@@ -1,17 +1,17 @@
 /**
  * An authorization lambda function for the Cimpress Mass Customization Platform.
- * @copyright 2017 Cimpress, Inc.
+ * @copyright 2018 Cimpress, Inc.
  */
 
-'use strict'
-
-import { promisifyAll } from 'bluebird'
+import { promisify, promisifyAll } from 'bluebird'
+import { decode, verify } from 'jsonwebtoken'
 import JwksClient from 'jwks-rsa'
 import { resolve } from 'url'
 
-const MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authorizer."
-const UNAUTHORIZED = new Error('Unauthorized')
+const AUDIENCE = 'https://api.cimpress.io/'
 const AUTHORITY = 'https://cimpress.auth0.com/'
+const MISCONFIGURATION = new Error("This authorizer is not configured as a 'TOKEN' authorizer.")
+const UNAUTHORIZED = new Error('Unauthorized')
 
 const jwksUri = resolve(AUTHORITY, '/.well-known/jwks.json')
 const client = promisifyAll(new JwksClient({
@@ -19,13 +19,13 @@ const client = promisifyAll(new JwksClient({
   rateLimit: true,
   jwksUri
 }))
-const { decode, verifyAsync } = promisifyAll(require('jsonwebtoken'))
+const verifyAsync = promisify(verify)
 
 /**
  * A callback indicating success or failure to the calling entity.
  *
  * @callback eventCallback
- * @param {string|Error} failure - A description of the failure.
+ * @param {String|Error} failure - A description of the failure.
  * @param {Object} success - An API Gateway authorizer response document.
  * @returns {void}
  */
@@ -34,22 +34,31 @@ const { decode, verifyAsync } = promisifyAll(require('jsonwebtoken'))
  * An event indicating a request coming into API Gateway that requires authorization.
  *
  * @typedef {Object} ApiGatewayAuthorizationEvent
- * @property {!string} type - The type of authorization that has been requested.
- * @property {!string} authorizationToken - The token to be checked for authentication.
- * @property {!string} methodArn - The ARN of the method which requires authorization.
+ * @property {!String} type - The type of authorization that has been requested.
+ * @property {!String} authorizationToken - The token to be checked for authentication.
+ * @property {!String} methodArn - The ARN of the method which requires authorization.
  */
 
 /**
  * Performs JWT Bearer authentication, and calls the provided callback.
  *
  * @async
- * @function handler
+ * @function default
  * @param {!ApiGatewayAuthorizationEvent} event - The event that caused this function to be invoked.
  * @param {!Object} context - The context associated with the event.
  * @param {!eventCallback} callback - A function that will be called when authentication succeeds or fails.
  * @returns {!Promise.<void>} - A promise which, when resolved, signals the result of authorization.
  */
-export async function handler ({ type: eventType, authorizationToken: token }, context, callback) {
+export default async function ({ type: eventType, authorizationToken: token, methodArn: arn }, context, callback) {
+  // note(cosborn) We're still gonna collect metrics if someone wastes our time.
+  const [ , , , , accountId, apiGatewayInfo ] = arn.split(':') // note(cosborn) arn:aws:execute-api:<regionId>:<accountId>:<apiId>/<stage>/<method>/<resourcePath>
+  const [ apiId ] = apiGatewayInfo.split('/')
+  console.log(JSON.stringify({
+    namespace: 'Platform Authorizer',
+    accountId,
+    apiId
+  }))
+
   if (eventType !== 'TOKEN') { // note(cosborn) Configuration check.
     return callback(MISCONFIGURATION)
   }
@@ -75,7 +84,7 @@ export async function handler ({ type: eventType, authorizationToken: token }, c
     const key = await client.getSigningKeyAsync(kid)
       .then(({ publicKey, rsaPublicKey }) => publicKey || rsaPublicKey)
     const { sub, scope } = await verifyAsync(tokenValue, key, {
-      audience: 'https://api.cimpress.io/',
+      audience: AUDIENCE,
       issuer: AUTHORITY
     })
     const resp = {
