@@ -1,62 +1,42 @@
 {
-  "name": "platform-authorizer",
-  "version": "0.2.0",
+  "name": "platform-authorization",
+  "version": "1.0.0",
   "license": "UNLICENSED",
   "private": true,
   "description": "A custom authorizer for AWS API Gateway for Cimpress Platform services.",
-  "main": "index.js",
   "author": {
     "name": "Fulfiller Enablement",
     "email": "fulfillerenablement@cimpress.com"
   },
-  "babel": {
-    "plugins": [
-      [
-        "transform-runtime",
-        {
-          "polyfill": false,
-          "regenerator": true
-        }
-      ]
-    ],
-    "presets": [
-      [
-        "env",
-        {
-          "targets": {
-            "node": "6.10"
-          }
-        }
-      ]
-    ]
-  },
   "eslintConfig": {
-    "extends": "standard"
+    "root": true
   },
   "dependencies": {
+    "aws-sdk": "^2.189.0",
+    "babel-runtime": "^6.26.0",
     "bluebird": "^3.5.1",
     "jsonwebtoken": "^8.1.0",
-    "jwks-rsa": "^1.2.1"
+    "jwks-rsa": "^1.2.1",
+    "zlib": "^1.0.5"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
-    "babel-eslint": "^8.0.3",
     "babel-loader": "^7.1.2",
     "babel-minify-webpack-plugin": "^0.2.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "eslint": "^4.13.1",
-    "eslint-config-defaults": "^9.0.0",
     "eslint-config-standard": "^11.0.0-beta.0",
     "eslint-loader": "^1.9.0",
     "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-node": "^6.0.0",
     "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-react": "^7.5.1",
     "eslint-plugin-standard": "^3.0.1",
+    "serverless-plugin-custom-roles": "^1.0.0",
     "serverless-plugin-tracing": "^2.0.0",
     "serverless-webpack": "^4.1.0",
-    "webpack": "^3.10.0"
+    "webpack": "^3.10.0",
+    "webpack-node-externals": "^1.6.0"
   }
 }
