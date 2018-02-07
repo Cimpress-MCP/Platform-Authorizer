@@ -26,6 +26,8 @@ build:
 .deploy_template: &deploy_definition
   stage: deploy
   script:
+    # Only until the docker image is on 1.26.
+    - yarn global add serverless@1.26.0
     - serverless deploy --stage $CI_ENVIRONMENT_NAME --aws-s3-accelerate
   only:
     - master
