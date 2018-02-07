@@ -9,6 +9,7 @@ custom:
 
 plugins:
   - serverless-webpack
+  - serverless-plugin-custom-roles
   - serverless-plugin-tracing
 
 provider:
@@ -16,30 +17,31 @@ provider:
   runtime: nodejs6.10
   region: eu-west-1
   versionFunctions: false # Otherwise, deployments would disable every service using this!
-  iamRoleStatements:
-    - Effect: 'Allow'
-      Action:
-        - 'xray:PutTraceSegments'
-        - 'xray:PutTelemetryRecords'
-      Resource: '*'
-    - Effect: 'Allow'
-      Action:
-        - 'cloudwatch:PutMetricData'
-      Resource: '*'
   stackTags:
     ROLE: Authorizer
 
 functions:
-  authorizer:
+  Authorizer:
     handler: authorizer.default
     description: Authenticates requests to the Cimpress Mass Customization Platform.
     tracing: true # This is X-Ray.
-  reporter:
+    iamRoleStatements:
+      - Effect: 'Allow'
+        Action:
+          - 'xray:PutTraceSegments'
+          - 'xray:PutTelemetryRecords'
+        Resource: '*'
+  Reporter:
     handler: reporter.default
     description: Reports metrics on the use of the Platform Authorizer.
+    iamRoleStatements:
+      - Effect: 'Allow'
+        Action:
+          - 'cloudwatch:PutMetricData'
+        Resource: '*'
     events:
       - cloudwatchLog:
-          logGroup: /aws/lambda/${self:service}-${opt:stage, self:provider.stage}-authorizer
+          logGroup: /aws/lambda/${self:service}-${opt:stage, self:provider.stage}-Authorizer
           filter: '{ $.namespace = "Platform Authorizer" }'
 
 resources:
