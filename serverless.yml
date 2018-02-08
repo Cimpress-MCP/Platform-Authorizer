@@ -34,6 +34,7 @@ functions:
   Reporter:
     handler: reporter.default
     description: Reports metrics on the use of the Platform Authorizer.
+    memorySize: 128
     iamRoleStatements:
       - Effect: 'Allow'
         Action:
