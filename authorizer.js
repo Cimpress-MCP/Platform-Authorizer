@@ -49,14 +49,11 @@ const verifyAsync = promisify(verify)
  * @param {!eventCallback} callback - A function that will be called when authentication succeeds or fails.
  * @returns {!Promise.<void>} - A promise which, when resolved, signals the result of authorization.
  */
-export default async function ({ type: eventType, authorizationToken: token, methodArn: arn }, context, callback) {
+export default async function ({ type: eventType, authorizationToken: token, methodArn }, context, callback) {
   // note(cosborn) We're still gonna collect metrics if someone wastes our time.
-  const [ , , , , accountId, apiGatewayInfo ] = arn.split(':') // note(cosborn) arn:aws:execute-api:<regionId>:<accountId>:<apiId>/<stage>/<method>/<resourcePath>
-  const [ apiId ] = apiGatewayInfo.split('/')
   console.log(JSON.stringify({
     namespace: 'Platform Authorizer',
-    accountId,
-    apiId
+    methodArn
   }))
 
   if (eventType !== 'TOKEN') { // note(cosborn) Configuration check.
