@@ -44,9 +44,11 @@ export default async function ({ awslogs: { data: input } }) {
     .then(JSON.parse)
 
   const metricData = logEvents
-    .map(({ message }) => message.split('\t'))
+    .map(({ message }) => message.split('\t')) // note(cosborn) Strip λ preamble.
     .map(([ , , event ]) => JSON.parse(event))
-    .map(({ accountId, apiId }) => [
+    .map(({ methodArn }) => methodArn.split(':')) // note(cosborn) arn:aws:execute-api:<regionId>:<accountId>:<apiId>/<stage>/<method>/<resourcePath>
+    .map(([ , , , , accountId, apiGatewayInfo ]) => [ accountId, ...apiGatewayInfo.split('/') ])
+    .map(([ accountId, apiId ]) => [
       {
         Dimensions: [
           {
