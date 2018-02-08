@@ -1,7 +1,7 @@
-const { join } = require('path');
-const MinifyPlugin = require('babel-minify-webpack-plugin');
-const { lib: { entries: entry }} = require('serverless-webpack');
-const nodeExternals = require('webpack-node-externals');
+const { join } = require('path')
+const MinifyPlugin = require('babel-minify-webpack-plugin')
+const { lib: { entries: entry }} = require('serverless-webpack')
+const nodeExternals = require('webpack-node-externals')
 
 module.exports = {
   entry,
@@ -41,15 +41,6 @@ module.exports = {
         test: /\.js$/,
         loader: 'babel-loader',
         options: {
-          plugins: [
-            [
-              'transform-runtime',
-              {
-                polyfill: false,
-                regenerator: true
-              }
-            ]
-          ],
           presets: [
             [
               'env',
@@ -72,4 +63,4 @@ module.exports = {
   },
   externals: [ nodeExternals() ],
   plugins: [ new MinifyPlugin() ]
-};
+}
