@@ -3,8 +3,10 @@
  * @copyright 2018 Cimpress, Inc.
  */
 
+'use strict'
+
 import { CloudWatch } from 'aws-sdk'
-import { promisify } from 'bluebird'
+import { promisify } from 'es6-promisify'
 import { Buffer } from 'buffer'
 import { gunzip } from 'zlib'
 
@@ -70,7 +72,7 @@ export default async function ({ awslogs: { data: input } }) {
         ]
       }
     ]).reduce((a, b) => a.concat(b), []) // flatMap
-    .map(ds => Object.assign({}, metric, ds))
+    .map(ds => ({ ...metric, ...ds }))
 
   return client.putMetricData({
     MetricData: metricData,
