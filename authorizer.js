@@ -3,22 +3,36 @@
  * @copyright 2018 Cimpress, Inc.
  */
 
-import { promisify, promisifyAll } from 'bluebird'
+'use strict'
+
 import { decode, verify } from 'jsonwebtoken'
+import { promisify } from 'es6-promisify'
 import JwksClient from 'jwks-rsa'
 import { resolve } from 'url'
 
 const AUDIENCE = 'https://api.cimpress.io/'
 const AUTHORITY = 'https://cimpress.auth0.com/'
-const MISCONFIGURATION = new Error("This authorizer is not configured as a 'TOKEN' authorizer.")
-const UNAUTHORIZED = new Error('Unauthorized')
+const MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authorizer."
+const UNAUTHORIZED = 'Unauthorized'
 
 const jwksUri = resolve(AUTHORITY, '/.well-known/jwks.json')
-const client = promisifyAll(new JwksClient({
+const client = new JwksClient({
   cache: true,
   rateLimit: true,
   jwksUri
-}))
+})
+const getSigningKeyAsync = promisify(client.getSigningKey.bind(client))
+const policyDocument = {
+  Version: '2012-10-17',
+  Statement: [
+    {
+      Action: 'execute-api:Invoke',
+      Effect: 'Allow',
+      // note(cosborn) Tokens are valid for the whole platform, so this doesn't need to be restrictive.
+      Resource: 'arn:aws:execute-api:*:*:*/*/*'
+    }
+  ]
+}
 const verifyAsync = promisify(verify)
 
 /**
@@ -64,7 +78,7 @@ export default async function ({ type: eventType, authorizationToken: token, met
     return callback(UNAUTHORIZED)
   }
 
-  const [, tokenValue] = token.match(/^Bearer (.*)$/) || [] // note(cosborn) Should also be handled by config.
+  const [, tokenValue] = token.match(/^Bearer +(.*)$/) || [] // note(cosborn) Should also be handled by config.
   const decoded = decode(tokenValue, { complete: true })
   if (!decoded) {
     console.log('Authorization token could not be decoded.', { token })
@@ -78,28 +92,13 @@ export default async function ({ type: eventType, authorizationToken: token, met
   }
 
   try {
-    const key = await client.getSigningKeyAsync(kid)
+    const key = await getSigningKeyAsync(kid)
       .then(({ publicKey, rsaPublicKey }) => publicKey || rsaPublicKey)
-    const { sub, scope } = await verifyAsync(tokenValue, key, {
+    const { sub: principalId, scope } = await verifyAsync(tokenValue, key, {
       audience: AUDIENCE,
       issuer: AUTHORITY
     })
-    const resp = {
-      principalId: sub,
-      policyDocument: {
-        Version: '2012-10-17',
-        Statement: [
-          {
-            Action: 'execute-api:Invoke',
-            Effect: 'Allow',
-            // note(cosborn) Tokens are valid for the whole platform, so this doesn't need to be restrictive.
-            Resource: 'arn:aws:execute-api:*:*:*/*/*'
-          }
-        ]
-      },
-      context: { scope }
-    }
-    return callback(null, resp)
+    return callback(null, { principalId, policyDocument, context: { scope } })
   } catch (err) {
     console.log('An error occurred validating the token.', { jwksUri, kid, err })
     return callback(UNAUTHORIZED)

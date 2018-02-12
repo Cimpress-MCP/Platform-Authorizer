@@ -7,6 +7,9 @@ custom:
     forceExclude:
       - aws-sdk
 
+package:
+  individually: true
+
 plugins:
   - serverless-webpack
   - serverless-plugin-custom-roles
@@ -26,19 +29,19 @@ functions:
     description: Authenticates requests to the Cimpress Mass Customization Platform.
     tracing: true # This is X-Ray.
     iamRoleStatements:
-      - Effect: 'Allow'
+      - Effect: Allow
         Action:
-          - 'xray:PutTraceSegments'
-          - 'xray:PutTelemetryRecords'
+          - xray:PutTraceSegments
+          - xray:PutTelemetryRecords
         Resource: '*'
   Reporter:
     handler: reporter.default
     description: Reports metrics on the use of the Platform Authorizer.
     memorySize: 128
     iamRoleStatements:
-      - Effect: 'Allow'
+      - Effect: Allow
         Action:
-          - 'cloudwatch:PutMetricData'
+          - cloudwatch:PutMetricData
         Resource: '*'
     events:
       - cloudwatchLog:
