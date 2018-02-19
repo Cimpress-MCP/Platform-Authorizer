@@ -12,7 +12,6 @@ import { gunzip } from 'zlib'
 
 const client = new CloudWatch()
 const gunzipAsync = promisify(gunzip)
-
 const metric = {
   MetricName: 'UseCount',
   Value: 1
@@ -38,18 +37,20 @@ const metric = {
  * @async
  * @function default
  * @param {!CloudWatchLogEvent} event - The event that caused this function to be invoked.
- * @returns {!Promise.<void>} - A promise which, when resolved, signals the result of authorization.
+ * @param {!AwsLogs} event.awslogs - The event that caused this function to be invoked.
+ * @param {!String} event.awslogs.data - The contents of the log message, gzipped and Base64 encoded.
+ * @returns {!Promise.<Object>} - A promise which, when resolved, signals the result of reporting.
  */
 export default async function ({ awslogs: { data: input } }) {
   const { logEvents } = await gunzipAsync(Buffer.from(input, 'base64'))
     .then(r => r.toString('utf8'))
     .then(JSON.parse)
 
-  const metricData = logEvents
-    .map(({ message }) => message.split('\t')) // note(cosborn) Strip λ preamble.
-    .map(([ , , event ]) => JSON.parse(event))
-    .map(({ methodArn }) => methodArn.split(':')) // note(cosborn) arn:aws:execute-api:<regionId>:<accountId>:<apiId>/<stage>/<method>/<resourcePath>
-    .map(([ , , , , accountId, apiGatewayInfo ]) => [ accountId, ...apiGatewayInfo.split('/') ])
+  const MetricData = logEvents
+    .map(JSON.parse)
+    // note(cosborn) arn:aws:execute-api:<regionId>:<accountId>:<apiId>/authorizers/<resourceId>
+    .map(({ requestParameters: { sourceArn } }) => sourceArn.split(':'))
+    .map(([ , , , , accountId, authorizerInfo ]) => [ accountId, ...authorizerInfo.split('/') ])
     .map(([ accountId, apiId ]) => [
       {
         Dimensions: [
@@ -75,7 +76,7 @@ export default async function ({ awslogs: { data: input } }) {
     .map(ds => ({ ...metric, ...ds }))
 
   return client.putMetricData({
-    MetricData: metricData,
-    Namespace: 'Platform Authorizer'
+    Namespace: 'Platform Authorizer',
+    MetricData
   }).promise()
 }

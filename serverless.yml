@@ -7,13 +7,13 @@ custom:
     forceExclude:
       - aws-sdk
 
-package:
-  individually: true
-
 plugins:
-  - serverless-webpack
   - serverless-plugin-custom-roles
   - serverless-plugin-tracing
+  - serverless-webpack
+
+package:
+  individually: true
 
 provider:
   name: aws
@@ -45,8 +45,72 @@ functions:
         Resource: '*'
     events:
       - cloudwatchLog:
-          logGroup: /aws/lambda/${self:service}-${opt:stage, self:provider.stage}-Authorizer
-          filter: '{ $.namespace = "Platform Authorizer" }'
+          logGroup: &metricsLogGroup /aws/cloudtrail/${self:service}-${opt:stage, self:provider.stage}-Metrics
+          filter: '{ $.eventName = Invoke }'
 
 resources:
   Description: A custom authorizer for the Mass Customization Platform.
+  # note(cosborn)
+  # This looks very fiddly, but all we're doing is setting up CloudTrail
+  # to deliver log entries to the CloudWatch log group we specified above:
+  # the one with the event handler.
+  Resources:
+    TrailBucket:
+      Type: AWS::S3::Bucket
+      DeletionPolicy: Retain
+      Properties:
+        LifecycleConfiguration:
+          Rules:
+            - ExpirationInDays: 90 # ¯\_(ツ)_/¯
+              Status: Enabled
+    TrailBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: { Ref: TrailBucket }
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: cloudtrail.amazonaws.com
+              Action: s3:PutObject
+              Resource: { Fn::GetAtt: [ TrailBucket, Arn ] }
+    TrailLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        Name: *metricsLogGroup
+        RetentionInDays: 1 # note(cosborn) Super short because we event on each entry.
+    TrailLogGroupRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: cloudtrail.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action: logs:CreateLogStream
+                  Resource: { Fn::GetAtt: [ TrailLogGroup, Arn ] }
+                - Effect: Allow
+                  Action: logs:PutLogEvents
+                  Resource: { Fn::GetAtt: [ TrailLogGroup, Arn ] }
+    Trail:
+      Type: AWS::CloudTrail::Trail
+      Properties:
+        # todo(cosborn) Add SNS if some outside force wants these logs.
+        IsLogging: true
+        EventSelectors:
+          - DataResources:
+              - Type: AWS::Lambda::Function
+                Values:
+                  - Fn::GetAtt: [ AuthorizerLambdaFunction, Arn ]
+            IncludeManagementEvents: false
+        S3BucketName: { Ref: TrailBucket }
+        CloudWatchLogsLogGroupArn: { Fn::GetAtt: [ TrailLogGroup, Arn ] }
+        CloudWatchLogsRoleArn: { Fn::GetAtt: [ TrailLogGroupRole, Arn ] }

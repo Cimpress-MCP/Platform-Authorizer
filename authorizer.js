@@ -50,7 +50,6 @@ const verifyAsync = promisify(verify)
  * @typedef {Object} ApiGatewayAuthorizationEvent
  * @property {!String} type - The type of authorization that has been requested.
  * @property {!String} authorizationToken - The token to be checked for authentication.
- * @property {!String} methodArn - The ARN of the method which requires authorization.
  */
 
 /**
@@ -59,17 +58,13 @@ const verifyAsync = promisify(verify)
  * @async
  * @function default
  * @param {!ApiGatewayAuthorizationEvent} event - The event that caused this function to be invoked.
+ * @param {!String} event.type - The type of authorization that has been requested.
+ * @param {!String} event.authorizationToken - The token to be checked for authentication.
  * @param {!Object} context - The context associated with the event.
  * @param {!eventCallback} callback - A function that will be called when authentication succeeds or fails.
  * @returns {!Promise.<void>} - A promise which, when resolved, signals the result of authorization.
  */
-export default async function ({ type: eventType, authorizationToken: token, methodArn }, context, callback) {
-  // note(cosborn) We're still gonna collect metrics if someone wastes our time.
-  console.log(JSON.stringify({
-    namespace: 'Platform Authorizer',
-    methodArn
-  }))
-
+export default async function ({ type: eventType, authorizationToken: token }, context, callback) {
   if (eventType !== 'TOKEN') { // note(cosborn) Configuration check.
     return callback(MISCONFIGURATION)
   }

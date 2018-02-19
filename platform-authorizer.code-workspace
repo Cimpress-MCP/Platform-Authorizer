@@ -16,7 +16,6 @@
       ".editorconfig": true,
       ".gitignore": true,
       ".gitlab-ci.yml": true,
-      ".eslintrc.*": true
     }
   }
 }
