@@ -1,4 +1,4 @@
-image: amaysim/serverless:1.25.0
+image: amaysim/serverless:1.26.0
 
 stages:
   - setup
@@ -19,15 +19,11 @@ setup:
 build:
   stage: build
   script:
-    # Only until the docker image is on 1.26.
-    - yarn global add serverless@1.26.0
     - serverless package --stage build
 
 .deploy_template: &deploy_definition
   stage: deploy
   script:
-    # Only until the docker image is on 1.26.
-    - yarn global add serverless@1.26.0
     - serverless deploy --stage $CI_ENVIRONMENT_NAME --aws-s3-accelerate
   only:
     - master
