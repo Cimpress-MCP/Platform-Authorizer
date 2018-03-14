@@ -86,9 +86,9 @@ resources:
                 Service: cloudtrail.amazonaws.com
               Action: sts:AssumeRole
         Policies:
-          - PolicyDocument:
+          - PolicyName: TrailCanWriteLogs
+            PolicyDocument:
               Version: '2012-10-17'
-              PolicyName: TrailCanWriteLogs
               Statement:
                 - Effect: Allow
                   Action: logs:CreateLogStream
