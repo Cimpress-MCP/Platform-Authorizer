@@ -1,4 +1,4 @@
-image: amaysim/serverless:1.26.0
+image: marcelocorreia/serverless:1.26.1
 
 stages:
   - setup

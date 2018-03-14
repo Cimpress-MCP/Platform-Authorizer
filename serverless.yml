@@ -9,7 +9,6 @@ custom:
 
 plugins:
   - serverless-plugin-custom-roles
-  - serverless-plugin-tracing
   - serverless-webpack
 
 package:
@@ -27,13 +26,9 @@ functions:
   Authorizer:
     handler: authorizer.default
     description: Authenticates requests to the Cimpress Mass Customization Platform.
-    tracing: true # This is X-Ray.
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - xray:PutTraceSegments
-          - xray:PutTelemetryRecords
-        Resource: '*'
+    environment:
+      AUDIENCE: https://api.cimpress.io/
+      AUTHORITY: https://cimpress.auth0.com/
   Reporter:
     handler: reporter.default
     description: Reports metrics on the use of the Platform Authorizer.

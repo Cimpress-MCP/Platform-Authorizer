@@ -1,5 +1,6 @@
 /**
  * An authorization lambda function for the Cimpress Mass Customization Platform.
+ *
  * @copyright 2018 Cimpress, Inc.
  */
 
@@ -10,8 +11,8 @@ import { promisify } from 'es6-promisify'
 import JwksClient from 'jwks-rsa'
 import { resolve } from 'url'
 
-const AUDIENCE = 'https://api.cimpress.io/'
-const AUTHORITY = 'https://cimpress.auth0.com/'
+const AUDIENCE = process.env['AUDENCE']
+const AUTHORITY = process.env['AUTHORITY']
 const MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authorizer."
 const UNAUTHORIZED = 'Unauthorized'
 
@@ -39,8 +40,8 @@ const verifyAsync = promisify(verify)
  * A callback indicating success or failure to the calling entity.
  *
  * @callback eventCallback
- * @param {String|Error} failure - A description of the failure.
- * @param {Object} success - An API Gateway authorizer response document.
+ * @param {String|Error} failure A description of the failure.
+ * @param {Object} success An API Gateway authorizer response document.
  * @returns {void}
  */
 
@@ -48,21 +49,19 @@ const verifyAsync = promisify(verify)
  * An event indicating a request coming into API Gateway that requires authorization.
  *
  * @typedef {Object} ApiGatewayAuthorizationEvent
- * @property {!String} type - The type of authorization that has been requested.
- * @property {!String} authorizationToken - The token to be checked for authentication.
+ * @property {!String} type The type of authorization that has been requested.
+ * @property {!String} authorizationToken The token to be checked for authentication.
  */
 
 /**
  * Performs JWT Bearer authentication, and calls the provided callback.
  *
- * @async
- * @function default
- * @param {!ApiGatewayAuthorizationEvent} event - The event that caused this function to be invoked.
- * @param {!String} event.type - The type of authorization that has been requested.
- * @param {!String} event.authorizationToken - The token to be checked for authentication.
- * @param {!Object} context - The context associated with the event.
- * @param {!eventCallback} callback - A function that will be called when authentication succeeds or fails.
- * @returns {!Promise.<void>} - A promise which, when resolved, signals the result of authorization.
+ * @param {!ApiGatewayAuthorizationEvent} event The event that caused this function to be invoked.
+ * @param {!String} event.type The type of authorization that has been requested.
+ * @param {!String} event.authorizationToken The token to be checked for authentication.
+ * @param {!Object} context The context associated with the event.
+ * @param {!eventCallback} callback A function that will be called when authentication succeeds or fails.
+ * @returns {!Promise.<void>} A promise which, when resolved, signals the result of authorization.
  */
 export default async function ({ type: eventType, authorizationToken: token }, context, callback) {
   if (eventType !== 'TOKEN') { // note(cosborn) Configuration check.
