@@ -73,7 +73,7 @@ resources:
     TrailLogGroup:
       Type: AWS::Logs::LogGroup
       Properties:
-        Name: *metricsLogGroup
+        LogGroupName: *metricsLogGroup
         RetentionInDays: 1 # note(cosborn) Super short because we event on each entry.
     TrailLogGroupRole:
       Type: AWS::IAM::Role
