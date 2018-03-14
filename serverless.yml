@@ -88,6 +88,7 @@ resources:
         Policies:
           - PolicyDocument:
               Version: '2012-10-17'
+              PolicyName: TrailCanWriteLogs
               Statement:
                 - Effect: Allow
                   Action: logs:CreateLogStream
