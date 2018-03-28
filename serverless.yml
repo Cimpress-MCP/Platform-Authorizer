@@ -62,6 +62,7 @@ resources:
               Status: Enabled
     TrailBucketPolicy:
       Type: AWS::S3::BucketPolicy
+      DependsOn: TrailBucket
       Properties:
         Bucket: { Ref: TrailBucket }
         PolicyDocument:
