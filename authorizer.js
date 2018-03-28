@@ -2,6 +2,7 @@
  * An authorization lambda function for the Cimpress Mass Customization Platform.
  *
  * @copyright 2018 Cimpress, Inc.
+ * @license Apache-2.0
  */
 
 'use strict'

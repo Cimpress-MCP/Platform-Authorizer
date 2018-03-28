@@ -1,3 +1,5 @@
+# license: Apache-2.0
+
 service: Platform-Authorization
 
 frameworkVersion: '>=1.0.0 <2.0.0'
