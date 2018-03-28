@@ -1,7 +1,7 @@
 {
-  "name": "platform-authorization",
+  "name": "platform-authorizer",
   "version": "1.0.0",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "private": true,
   "description": "A custom authorizer for AWS API Gateway for Cimpress Platform services.",
   "author": {
