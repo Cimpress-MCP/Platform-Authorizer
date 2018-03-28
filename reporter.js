@@ -2,6 +2,7 @@
  * An metrics reporter lambda function for the Platform Authorizer.
  *
  * @copyright 2018 Cimpress, Inc.
+ * @license Apache-2.0
  */
 
 'use strict'
