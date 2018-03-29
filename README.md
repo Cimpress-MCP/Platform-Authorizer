@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Platform-Authorization is a custom authorizer intended to be used with AWS's API Gateway. API Gateway can use authorizers implemented as Lambda Functions to check authentication and authorization of a request before it passes through the gateway. This custom authorizer is meant for use with the Cimpress Mass Customization Platform, and is configured and customized for that.
+Platform-Authorization is a custom authorizer intended to be used with AWS's API Gateway. API Gateway can use authorizers implemented as Lambda Functions to check authentication and authorization of a request before it passes through the gateway. This custom authorizer is configured out of the box for use with the Cimpress Mass Customization Platform, and can be configured and customized for any particular use.
 
 ## Why You Want It
 
