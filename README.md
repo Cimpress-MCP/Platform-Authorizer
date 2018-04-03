@@ -13,5 +13,5 @@ It can be complex to get authentication working for a microservice on the MCP. T
 * Please find [usage guidance][] on the wiki.
 * Please find [development guidance][] on the wiki.
 
-[usage guidance]: https://cimpress.githost.io/cosborn/platform-authorizer/wikis/How-To-Use-It
-[development guidance]: https://cimpress.githost.io/cosborn/platform-authorizer/wikis/How-to-Develop-It
+[usage guidance]: https://github.com/Cimpress-MCP/Platform-Authorizer/wiki/How-to-Use-It
+[development guidance]: https://github.com/Cimpress-MCP/Platform-Authorizer/wiki/How-to-Develop-It
