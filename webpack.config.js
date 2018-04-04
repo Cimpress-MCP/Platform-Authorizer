@@ -47,11 +47,8 @@ module.exports = {
         test: /\.js$/,
         loader: 'babel-loader',
         options: {
-          plugins: [
-            [ 'transform-object-rest-spread', { useBuiltIns: true } ]
-          ],
           presets: [
-            [ 'env', { targets: { node: '6.10' } } ]
+            [ 'env', { targets: { node: '8.10' } } ]
           ]
         },
         exclude: /node_modules/
