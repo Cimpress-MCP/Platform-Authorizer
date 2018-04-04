@@ -12,7 +12,6 @@
     "root": true
   },
   "dependencies": {
-    "aws-sdk": "^2.189.0",
     "es6-promisify": "^6.0.0",
     "jsonwebtoken": "^8.1.0",
     "jwks-rsa": "^1.2.1"
@@ -30,7 +29,6 @@
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-standard": "^3.0.1",
     "serverless-webpack": "^4.1.0",
-    "webpack": "^3.10.0",
-    "webpack-node-externals": "^1.6.0"
+    "webpack": "^3.10.0"
   }
 }
