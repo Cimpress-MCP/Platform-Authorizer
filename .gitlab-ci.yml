@@ -19,7 +19,7 @@ setup:
 build:
   stage: build
   script:
-    - serverless package --stage build
+    - serverless package
 
 .deploy_template: &deploy_definition
   stage: deploy
