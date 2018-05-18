@@ -1,4 +1,4 @@
-image: marcelocorreia/serverless:1.26.1
+image: amaysim/serverless:1.27.1
 
 stages:
   - setup
@@ -24,7 +24,7 @@ build:
 .deploy_template: &deploy_definition
   stage: deploy
   script:
-    - serverless deploy --stage $CI_ENVIRONMENT_NAME --aws-s3-accelerate
+    - serverless deploy --stage "${CI_ENVIRONMENT_NAME}" --aws-s3-accelerate
   only:
     - master
 
