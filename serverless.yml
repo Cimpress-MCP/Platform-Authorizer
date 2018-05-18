@@ -22,3 +22,6 @@ functions:
     environment:
       AUDIENCE: https://api.cimpress.io/
       AUTHORITY: https://cimpress.auth0.com/
+
+resources:
+  Description: The platform authorizer.

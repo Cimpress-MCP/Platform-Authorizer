@@ -38,15 +38,6 @@ const policyDocument = {
 const verifyAsync = promisify(verify)
 
 /**
- * A callback indicating success or failure to the calling entity.
- *
- * @callback eventCallback
- * @param {String|Error} failure A description of the failure.
- * @param {Object} success An API Gateway authorizer response document.
- * @returns {void}
- */
-
-/**
  * An event indicating a request coming into API Gateway that requires authorization.
  *
  * @typedef {Object} ApiGatewayAuthorizationEvent
@@ -60,30 +51,28 @@ const verifyAsync = promisify(verify)
  * @param {!ApiGatewayAuthorizationEvent} event The event that caused this function to be invoked.
  * @param {!String} event.type The type of authorization that has been requested.
  * @param {!String} event.authorizationToken The token to be checked for authentication.
- * @param {!Object} context The context associated with the event.
- * @param {!eventCallback} callback A function that will be called when authentication succeeds or fails.
- * @returns {!Promise.<void>} A promise which, when resolved, signals the result of authorization.
+ * @returns {!Promise.<object>} A promise which, when resolved, signals the result of authorization.
  */
-export default async function ({ type: eventType, authorizationToken: token }, context, callback) {
+export default async function ({ type: eventType, authorizationToken: token }) {
   if (eventType !== 'TOKEN') { // note(cosborn) Configuration check.
-    return callback(MISCONFIGURATION)
+    throw MISCONFIGURATION
   }
 
   if (!token) { // note(cosborn) The configuration of the authorizer should handle this but sure why not
-    return callback(UNAUTHORIZED)
+    throw UNAUTHORIZED
   }
 
   const [, tokenValue] = token.match(/^Bearer +(.*)$/) || [] // note(cosborn) Should also be handled by config.
   const decoded = decode(tokenValue, { complete: true })
   if (!decoded) {
     console.log('Authorization token could not be decoded.', { token })
-    return callback(UNAUTHORIZED)
+    throw UNAUTHORIZED
   }
 
   const { header: { kid } = { } } = decoded
   if (!kid) {
     console.log("No 'kid' found in token header.", { header: decoded.header })
-    return callback(UNAUTHORIZED)
+    throw UNAUTHORIZED
   }
 
   try {
@@ -93,9 +82,9 @@ export default async function ({ type: eventType, authorizationToken: token }, c
       audience: AUDIENCE,
       issuer: AUTHORITY
     })
-    return callback(null, { principalId, policyDocument, context: { scope } })
+    return { principalId, policyDocument, context: { scope } }
   } catch (err) {
     console.log('An error occurred validating the token.', { jwksUri, kid, err })
-    return callback(UNAUTHORIZED)
+    throw UNAUTHORIZED
   }
 }
