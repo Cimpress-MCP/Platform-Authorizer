@@ -25,3 +25,10 @@ functions:
 
 resources:
   Description: The platform authorizer.
+  Outputs:
+    AuthorizerArn:
+      Description: The ARN of the Platform Authorizer.
+      Value:
+        "Fn::GetAtt": [ AuthorizerLambdaFunction, Arn ]
+      Export:
+        Name: ${opt:stage, 'unstable'}-PlatformAuthorizerArn
