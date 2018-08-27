@@ -1,4 +1,6 @@
-image: amaysim/serverless:1.27.1
+image:
+  name: intelygenz/serverless:1.30.0
+  entrypoint: [ "" ]
 
 stages:
   - setup
