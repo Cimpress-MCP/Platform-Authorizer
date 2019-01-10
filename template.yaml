@@ -8,8 +8,8 @@ Metadata:
     Description: A Lambda Authorizer that can perform authentication for services on the Cimpress Mass Customization Platform.
     Author: Christopher Osborn
     SpdxLicenseId: Apache-2.0
-    LicenseUrl: LICENSE
-    ReadmeUrl: README.md
+    LicenseUrl: ./LICENSE
+    ReadmeUrl: ./README.md
     Labels:
       - auth0
       - oauth2
