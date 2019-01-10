@@ -1,42 +1,37 @@
-image:
-  name: intelygenz/serverless:1.30.0
-  entrypoint: [ "" ]
+image: lambci/lambda:build-nodejs8.10
 
 stages:
-  - setup
   - build
+  - package
   - deploy
 
 cache:
   key: "$CI_PIPELINE_ID"
 
-setup:
-  stage: setup
-  script:
-    - yarn install
-  artifacts:
-    paths:
-      - node_modules/
-
 build:
   stage: build
+  before_script:
+    - npm install
   script:
-    - serverless package
+    - npm run build
+  artifacts:
+    paths:
+      - ./dist/
 
-.deploy_template: &deploy_definition
+package:
+  stage: package
+  script:
+    - sam package
+      --s3-bucket 'deployment-artifacts-eu-west-1-820870426321'
+      --s3-prefix 'platform-authorizer'
+      --output-template-file ./packaged.yaml
+  artifacts:
+    paths:
+      - ./packaged.yaml
+
+deploy:
   stage: deploy
   script:
-    - serverless deploy --stage "${CI_ENVIRONMENT_NAME}" --aws-s3-accelerate
+    - sam publish --template ./packaged.yaml
   only:
     - master
-
-deploy_unstable:
-  <<: *deploy_definition
-  environment:
-    name: unstable
-
-deploy_public:
-  <<: *deploy_definition
-  environment:
-    name: public
-  when: manual

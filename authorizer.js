@@ -8,33 +8,33 @@
 'use strict'
 
 import { decode, verify } from 'jsonwebtoken'
-import { promisify } from 'es6-promisify'
 import JwksClient from 'jwks-rsa'
-import { resolve } from 'url'
+import { URL } from 'url'
+import { promisify } from 'util'
 
-const AUDIENCE = process.env['AUDENCE']
+const AUDIENCE = process.env['AUDIENCE']
 const AUTHORITY = process.env['AUTHORITY']
+const RESOURCE = process.env['RESOURCE']
 const MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authorizer."
 const UNAUTHORIZED = 'Unauthorized'
 
-const jwksUri = resolve(AUTHORITY, '/.well-known/jwks.json')
-const client = new JwksClient({
+const jwksUri = new URL('/.well-known/jwks.json', AUTHORITY)
+const client = JwksClient({
   cache: true,
   rateLimit: true,
   jwksUri
 })
-const getSigningKeyAsync = promisify(client.getSigningKey.bind(client))
 const policyDocument = {
   Version: '2012-10-17',
   Statement: [
     {
       Action: 'execute-api:Invoke',
       Effect: 'Allow',
-      // note(cosborn) Tokens are valid for the whole platform, so this doesn't need to be restrictive.
-      Resource: 'arn:aws:execute-api:*:*:*/*/*'
+      Resource: RESOURCE
     }
   ]
 }
+const getSigningKeyAsync = promisify(client.getSigningKey.bind(client))
 const verifyAsync = promisify(verify)
 
 /**
@@ -51,7 +51,7 @@ const verifyAsync = promisify(verify)
  * @param {!ApiGatewayAuthorizationEvent} event The event that caused this function to be invoked.
  * @param {!String} event.type The type of authorization that has been requested.
  * @param {!String} event.authorizationToken The token to be checked for authentication.
- * @returns {!Promise.<object>} A promise which, when resolved, signals the result of authorization.
+ * @returns {!Promise.<Object>} A promise which, when resolved, signals the result of authorization.
  */
 export default async function ({ type: eventType, authorizationToken: token }) {
   if (eventType !== 'TOKEN') { // note(cosborn) Configuration check.

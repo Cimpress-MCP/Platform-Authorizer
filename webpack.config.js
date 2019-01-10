@@ -6,10 +6,9 @@
 
 const { join } = require('path')
 const MinifyPlugin = require('babel-minify-webpack-plugin')
-const { lib: { entries: entry }} = require('serverless-webpack')
 
 module.exports = {
-  entry,
+  entry: { authorizer: './authorizer.js' },
   target: 'node',
   stats: 'errors-only',
   module: {
@@ -56,7 +55,7 @@ module.exports = {
   },
   output: {
     libraryTarget: 'commonjs2',
-    path: join(__dirname, '.webpack'),
+    path: join(__dirname, 'dist'),
     filename: '[name].js'
   },
   plugins: [ new MinifyPlugin() ]

@@ -3,32 +3,34 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
-  "description": "A custom authorizer for AWS API Gateway for Cimpress Platform services.",
+  "description": "A lambda authorizer for AWS API Gateway for Auth0-integrated services.",
   "author": {
     "name": "Fulfiller Enablement",
     "email": "fulfillerenablement@cimpress.com"
+  },
+  "scripts": {
+    "build": "webpack"
   },
   "eslintConfig": {
     "root": true
   },
   "dependencies": {
-    "es6-promisify": "^6.0.0",
-    "jsonwebtoken": "^8.1.0",
-    "jwks-rsa": "^1.2.1"
+    "jsonwebtoken": "^8.4.0",
+    "jwks-rsa": "^1.3.0"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-minify-webpack-plugin": "^0.2.0",
-    "babel-preset-env": "^1.6.1",
-    "eslint": "^4.13.1",
-    "eslint-config-standard": "^11.0.0-beta.0",
-    "eslint-loader": "^1.9.0",
-    "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-node": "^6.0.0",
-    "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-standard": "^3.0.1",
-    "serverless-webpack": "^4.1.0",
-    "webpack": "^3.10.0"
+    "@babel/core": "^7.2.0",
+    "babel-loader": "^8.0.0",
+    "babel-minify-webpack-plugin": "^0.3.0",
+    "babel-preset-env": "^1.7.0",
+    "eslint": "^5.10.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-loader": "^2.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^8.0.0",
+    "eslint-plugin-promise": "^4.0.0",
+    "eslint-plugin-standard": "^4.0.0",
+    "webpack": "^4.27.0",
+    "webpack-cli": "^3.1.0"
   }
 }
