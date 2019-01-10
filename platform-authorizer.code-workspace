@@ -9,13 +9,13 @@
       "**/.git/": true,
       "**/.DS_Store": true,
       "node_modules/": true,
-      ".serverless/": true,
-      ".webpack/": true,
+      "dist/": true,
       "*.code-workspace": true,
-      "yarn.lock": true,
+      "package-lock.json": true,
       ".editorconfig": true,
       ".gitignore": true,
-      ".gitlab-ci.yml": true,
+      ".gitattributes": true,
+      ".gitlab-ci.yml": true
     }
   }
 }

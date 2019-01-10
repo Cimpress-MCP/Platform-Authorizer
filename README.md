@@ -1,4 +1,4 @@
-﻿# API Gateway Platform Authorization
+# API Gateway Platform Authorization
 
 ## What It Is
 
