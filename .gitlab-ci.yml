@@ -21,7 +21,6 @@ build:
 package:
   stage: package
   script:
-    - ls
     - sam package
       --s3-bucket 'deployment-artifacts-eu-west-1-820870426321'
       --s3-prefix 'platform-authorizer'

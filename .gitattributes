@@ -1,4 +1,3 @@
 *                         text=auto
 .gitattributes            eol=lf
 .gitignore                eol=lf
-infrastructure.sh         eol=lf
