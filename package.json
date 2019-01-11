@@ -1,18 +1,62 @@
 {
   "name": "platform-authorizer",
-  "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
   "description": "A lambda authorizer for AWS API Gateway for Auth0-integrated services.",
   "author": {
-    "name": "Fulfiller Enablement",
-    "email": "fulfillerenablement@cimpress.com"
+    "email": "fulfillerenablement@cimpress.com",
+    "name": "Fulfiller Enablement"
   },
   "scripts": {
-    "build": "webpack"
+    "bundle": "webpack",
+    "test": "jest"
   },
   "eslintConfig": {
-    "root": true
+    "root": true,
+    "extends": [
+      "eslint:recommended",
+      "plugin:import/errors",
+      "plugin:import/warnings",
+      "plugin:promise/recommended",
+      "standard"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2017,
+      "ecmaFeatures": {
+        "impliedStrict": true
+      },
+      "sourceType": "module"
+    },
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "rules": {
+      "max-len": [
+        "error",
+        {
+          "code": 120
+        }
+      ],
+      "max-statements": "off",
+      "no-console": "off",
+      "no-process-env": "off"
+    }
+  },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "node": "8.10"
+          }
+        }
+      ]
+    ]
+  },
+  "jest": {
+    "testEnvironment": "node"
   },
   "dependencies": {
     "jsonwebtoken": "^8.4.0",
@@ -30,6 +74,7 @@
     "eslint-plugin-node": "^8.0.0",
     "eslint-plugin-promise": "^4.0.0",
     "eslint-plugin-standard": "^4.0.0",
+    "jest": "^23.6.0",
     "webpack": "^4.27.0",
     "webpack-cli": "^3.1.0"
   }
