@@ -1,3 +1,1 @@
-*                         text=auto
-.gitattributes            eol=lf
-.gitignore                eol=lf
+*                         text=auto eol=lf

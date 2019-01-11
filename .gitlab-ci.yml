@@ -1,19 +1,30 @@
 image: lambci/lambda:build-nodejs8.10
 
 stages:
-  - build
+  - test
+  - bundle
   - package
   - deploy
 
 cache:
   key: "$CI_PIPELINE_ID"
 
-build:
-  stage: build
+test:
+  stage: test
+  variables:
+    AUTHORITY: https://cimpress.auth0.com/
   before_script:
     - npm install
   script:
-    - npm run build
+    - npm run test
+  artifacts:
+    paths:
+      - ./node_modules/
+
+bundle:
+  stage: bundle
+  script:
+    - npm run bundle -- --mode=production
   artifacts:
     paths:
       - ./dist/

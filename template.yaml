@@ -18,7 +18,7 @@ Metadata:
       - lambda
       - authorizer
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
-    SemanticVersion: 1.0.1
+    SemanticVersion: 2.0.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
 Parameters:
   Audience:
@@ -40,8 +40,6 @@ Globals:
       Variables:
         AUDIENCE: !Ref Audience
         AUTHORITY: !Ref Authority
-        # note(cosborn) Tokens are valid for the whole stage, so this doesn't need to be restrictive.
-        RESOURCE: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:*/*/*/*
 Resources:
   Authorizer:
     Type: AWS::Serverless::Function

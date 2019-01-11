@@ -1,3 +1,7 @@
+## Version 2.0.0 (Released 2019-01-11)
+
+- The authorizer is now available on the Serverless Application Repository.
+
 ## Version 1.4.0 (Released 2018-04-04)
 
 - The authorizer's runtime has been updated to Node 8.
