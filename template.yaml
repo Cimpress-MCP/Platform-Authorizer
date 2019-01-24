@@ -34,12 +34,11 @@ Parameters:
 Globals:
   Function:
     Runtime: nodejs8.10
-    Timeout: 5
-    MemorySize: 128
     Environment:
       Variables:
         AUDIENCE: !Ref Audience
         AUTHORITY: !Ref Authority
+        CACHE_TABLE_NAME: !Ref CacheTable
 Resources:
   Authorizer:
     Type: AWS::Serverless::Function
@@ -47,6 +46,14 @@ Resources:
       CodeUri: ./dist
       Handler: authorizer.default
       Description: A API Gateway Lambda Authorizer.
+      Policies:
+        - DynamoDBCrudPolicy:
+          TableName: !Ref CacheTable
+  CacheTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      SSESpecification:
+        SSEEnabled: true
 Outputs:
   AuthorizerArn:
     Description: The ARN of the authorizer for the specified stage of the specified API.

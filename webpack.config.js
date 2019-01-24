@@ -10,6 +10,7 @@ const { join } = require('path')
 
 module.exports = {
   entry: { authorizer: './authorizer.js' },
+  externals: [ 'aws-sdk' ],
   mode: 'development',
   module: {
     rules: [
