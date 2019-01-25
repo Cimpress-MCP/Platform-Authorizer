@@ -7,7 +7,7 @@
 
 import { createPolicyDocument as sut } from './authorizer'
 
-const allEndpoints = 'arn:aws:execute-api:region:account-id:api-id/stage-name/*'
+const allEndpoints = 'arn:aws:execute-api:region:account-id:api-id/stage-name/*/*'
 
 describe('a resource path converts', () => {
   test('from the example', () => {

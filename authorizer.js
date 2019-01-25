@@ -5,14 +5,14 @@
  * @license Apache-2.0
  */
 
-import { DynamoDB } from 'aws-sdk'
 import JwksClient, { SigningKeyNotFoundError } from 'jwks-rsa'
 import { decode, verify } from 'jsonwebtoken'
+import { DynamoDB } from 'aws-sdk'
 import { URL } from 'url'
 import { promisify } from 'util'
 
 const { AUDIENCE, AUTHORITY, CACHE_TABLE_NAME } = process.env
-const ID = 'platform-authorizer'
+const ID = 'key-set'
 const MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authorizer."
 const UNAUTHORIZED = 'Unauthorized'
 
@@ -25,20 +25,20 @@ const jwksClient = JwksClient({ jwksUri })
 const getSigningKeysAsync = promisify(jwksClient.getSigningKeys.bind(jwksClient))
 const verifyAsync = promisify(verify)
 
-/** @type {Array.<JwksClient.Jwk>} */
+/** @type {JwksClient.Jwk[]} */
 let memorySigningKeys = []
 
 /**
  * An Amazon Resource Name.
  *
- * @typedef {String} ARN
+ * @typedef {string} ARN
  */
 
 /**
  * An event indicating a request coming into API Gateway that requires authorization.
  *
- * @typedef {Object} ApiGatewayAuthorizationEvent
- * @property {String} authorizationToken The token to be checked for authentication.
+ * @typedef {object} ApiGatewayAuthorizationEvent
+ * @property {string} authorizationToken The token to be checked for authentication.
  * @property {ARN} methodArn The ARN of the 'execute-api' resource sought.
  * @property {'TOKEN'|'REQUEST'} type The type of authorization that has been requested.
  */
@@ -46,27 +46,27 @@ let memorySigningKeys = []
 /**
  * A document indicating permissions to invoke resources.
  *
- * @typedef {Object} PolicyDocument
- * @property {Array.<PolicyStatement>} Statement The collection of policy statements.
- * @property {String} Version The version of the policy schema.
+ * @typedef {object} PolicyDocument
+ * @property {PolicyStatement[]} Statement The collection of policy statements.
+ * @property {string} Version The version of the policy schema.
  */
 
 /**
  * A statement asserting a permission on a resource.
  *
- * @typedef {Object} PolicyStatement
- * @property {String|Array.<String>} Action The action(s) on which the permission is asserted.
+ * @typedef {object} PolicyStatement
+ * @property {string|string[]} Action The action(s) on which the permission is asserted.
  * @property {'Allow'|'Deny'} Effect Whether this is an allowed or denied permission.
- * @property {ARN|Array.<ARN>} Resource The resource(s) to which this statement applies.
+ * @property {ARN|ARN[]} Resource The resource(s) to which this statement applies.
  */
 
 /**
  * A response coming from API Gateway upon authorization.
  *
- * @typedef {Object} ApiGatewayAuthorizationResponse
- * @property {Object} context Any additional data associated with the response.
+ * @typedef {object} ApiGatewayAuthorizationResponse
+ * @property {object} context Any additional data associated with the response.
  * @property {PolicyDocument} policyDocument The policy associated with the desired resource.
- * @property {String} principalId The unique identifier of the authorized entity.
+ * @property {string} principalId The unique identifier of the authorized entity.
  */
 
 /**
@@ -89,6 +89,7 @@ export default async function ({ 'authorizationToken': token, 'methodArn': arn, 
 
   // NOTE(cosborn) Should also be handled by config.
   const [, tokenValue = ''] = token.match(/^Bearer +(.*)$/u) || []
+
   const decoded = decode(tokenValue, { 'complete': true })
   if (!decoded) {
     console.log('Authorization token could not be decoded.', { token })
@@ -138,7 +139,7 @@ export function createPolicyDocument (arn) {
         'Action': 'execute-api:Invoke',
         'Effect': 'Allow',
         // NOTE(cosborn) Tokens are valid for the whole stage, so this doesn't need to be restrictive.
-        'Resource': `${api}/${stage}/*`
+        'Resource': `${api}/${stage}/*/*`
       }
     ],
     'Version': '2012-10-17'
@@ -146,7 +147,7 @@ export function createPolicyDocument (arn) {
 }
 
 /**
- * @param {String} kid A key ID.
+ * @param {string} kid A key ID.
  * @returns {Promise.<JwksClient.Jwk>} The JWK associated with the provided key ID.
  * @throws {SigningKeyNotFoundError} When the signing key is not found.
  */
