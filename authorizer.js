@@ -16,9 +16,7 @@ const ID = 'key-set'
 const MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authorizer."
 const UNAUTHORIZED = 'Unauthorized'
 
-const dynamo = new DynamoDB.DocumentClient({
-  'endpoint': 'http://dynamodb:8000'
-})
+const dynamo = new DynamoDB.DocumentClient()
 const jwksUri = new URL('/.well-known/jwks.json', AUTHORITY).toString()
 const jwksClient = JwksClient({ jwksUri })
 

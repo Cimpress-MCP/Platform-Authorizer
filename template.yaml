@@ -45,7 +45,7 @@ Resources:
     Properties:
       CodeUri: ./dist
       Handler: authorizer.default
-      Description: A API Gateway Lambda Authorizer.
+      Description: An API Gateway Lambda Authorizer.
       Policies:
         - DynamoDBCrudPolicy:
           TableName: !Ref CacheTable

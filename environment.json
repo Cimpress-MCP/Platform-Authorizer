@@ -1,0 +1,7 @@
+{
+  "Authorizer": {
+    "AUDIENCE": "https://api.cimpress.io/",
+    "AUTHORITY": "https://cimpress.auth0.com/",
+    "CACHE_TABLE_NAME": "jwks"
+  }
+}
