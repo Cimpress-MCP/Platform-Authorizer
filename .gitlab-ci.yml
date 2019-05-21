@@ -1,48 +1,57 @@
-image: lambci/lambda:build-nodejs8.10
+image: lambci/lambda:build-nodejs10.x
 
 stages:
-  - test
-  - bundle
-  - package
-  - deploy
+- test
+- bundle
+- package
+- deploy
 
 cache:
   key: "$CI_PIPELINE_ID"
 
-test:
+test-code:
   stage: test
   variables:
     AUTHORITY: https://cimpress.auth0.com/
   before_script:
-    - npm install
+  - npm ci
   script:
-    - npm run test
+  - npm run test
   artifacts:
     paths:
-      - ./node_modules/
+    - ./node_modules/
+
+test-template:
+  stage: test
+  before_script:
+  - pip install cfn-lint
+  - pip install --upgrade aws-sam-translator
+  script:
+  - sam validate
+  - cfn-lint --template ./template.yaml
 
 bundle:
   stage: bundle
   script:
-    - npm run bundle -- --mode=production
+  - npm run bundle -- --mode=production
   artifacts:
     paths:
-      - ./dist/
+    - ./dist/
 
 package:
   stage: package
   script:
-    - sam package
-      --s3-bucket 'deployment-artifacts-eu-west-1-820870426321'
-      --s3-prefix 'platform-authorizer'
-      --output-template-file ./packaged.yaml
+  - sam package
+    --s3-bucket 'deployment-artifacts-eu-west-1-820870426321'
+    --s3-prefix 'platform-authorizer'
+    --output-template-file ./packaged.yaml
   artifacts:
     paths:
-      - ./packaged.yaml
+    - ./packaged.yaml
 
 deploy:
   stage: deploy
   script:
-    - sam publish --template ./packaged.yaml
+  - sam publish --template ./packaged.yaml
   only:
-    - master
+  - master

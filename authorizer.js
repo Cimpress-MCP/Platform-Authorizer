@@ -5,23 +5,28 @@
  * @license Apache-2.0
  */
 
-import { decode, verify } from 'jsonwebtoken'
+'use strict'
+
+import { callbackify, promisify } from 'util'
 import JwksClient from 'jwks-rsa'
 import { URL } from 'url'
-import { promisify } from 'util'
+import { verify } from 'jsonwebtoken'
 
 const { AUDIENCE, AUTHORITY } = process.env
 const MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authorizer."
 const UNAUTHORIZED = 'Unauthorized'
 
-const jwksUri = new URL('/.well-known/jwks.json', AUTHORITY)
+const jwksUri = new URL('/.well-known/jwks.json', AUTHORITY).href
 const client = JwksClient({
   'cache': true,
   jwksUri,
   'rateLimit': true
 })
+
 const getSigningKeyAsync = promisify(client.getSigningKey.bind(client))
 const verifyAsync = promisify(verify)
+const getPublicKey = callbackify(({ kid }) => getSigningKeyAsync(kid)
+  .then(({ publicKey, rsaPublicKey }) => publicKey || rsaPublicKey))
 
 /**
  * An Amazon Resource Name.
@@ -77,29 +82,16 @@ export default async function ({ 'authorizationToken': token, 'methodArn': arn, 
     throw MISCONFIGURATION
   }
 
-  // BECAUSE(cosborn) The configuration of the authorizer should handle this but sure why not
+  // BECAUSE(cosborn) The configuration of the authorizer should handle this but let's fail fast
   if (!token) {
     throw UNAUTHORIZED
   }
 
   // NOTE(cosborn) Should also be handled by config.
-  const [, tokenValue] = token.match(/^Bearer +(.*)$/u) || []
-  const decoded = decode(tokenValue, { 'complete': true })
-  if (!decoded) {
-    console.log('Authorization token could not be decoded.', { token })
-    throw UNAUTHORIZED
-  }
-
-  const { 'header': { kid } = { } } = decoded
-  if (!kid) {
-    console.log("No 'kid' found in token header.", { 'header': decoded.header })
-    throw UNAUTHORIZED
-  }
+  const { 'groups': { jwt } = {} } = token.match(/^Bearer +(?<jwt>.*)$/u) || {}
 
   try {
-    const key = await getSigningKeyAsync(kid)
-      .then(({ publicKey, rsaPublicKey }) => publicKey || rsaPublicKey)
-    const { 'sub': principalId, scope } = await verifyAsync(tokenValue, key, {
+    const { 'sub': principalId, scope } = await verifyAsync(jwt, getPublicKey, {
       'audience': AUDIENCE,
       'issuer': AUTHORITY
     })
@@ -109,7 +101,7 @@ export default async function ({ 'authorizationToken': token, 'methodArn': arn, 
       principalId
     }
   } catch (err) {
-    console.log('An error occurred validating the token.', { err, jwksUri, kid })
+    console.log('An error occurred validating the token.', { err, jwksUri })
     throw UNAUTHORIZED
   }
 }
