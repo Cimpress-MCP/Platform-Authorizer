@@ -1,3 +1,8 @@
+## Version 2.1.0 (Released 2019-05-15)
+
+- The authorizer's runtime has been updated to Node 10.
+- Performance improvements have been applied, such no longer needing to decode a token twice.
+
 ## Version 2.0.0 (Released 2019-01-11)
 
 - The authorizer is now available on the Serverless Application Repository.

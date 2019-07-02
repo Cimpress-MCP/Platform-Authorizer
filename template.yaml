@@ -11,14 +11,14 @@ Metadata:
     LicenseUrl: ./LICENSE
     ReadmeUrl: ./README.md
     Labels:
-      - auth0
-      - oauth2
-      - cimpress
-      - authentication
-      - lambda
-      - authorizer
+    - auth0
+    - oauth2
+    - cimpress
+    - authentication
+    - lambda
+    - authorizer
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
-    SemanticVersion: 2.0.1
+    SemanticVersion: 2.1.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
 Parameters:
   Audience:
@@ -31,22 +31,19 @@ Parameters:
     Default: https://cimpress.auth0.com/
     AllowedPattern: ^https:\/\/.+
     ConstraintDescription: Authority must be an HTTPS URL.
-Globals:
-  Function:
-    Runtime: nodejs8.10
-    Timeout: 5
-    MemorySize: 128
-    Environment:
-      Variables:
-        AUDIENCE: !Ref Audience
-        AUTHORITY: !Ref Authority
 Resources:
   Authorizer:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./dist
       Handler: authorizer.default
-      Description: A API Gateway Lambda Authorizer.
+      Runtime: nodejs10.x
+      CodeUri: ./dist
+      Description: An API Gateway Lambda Authorizer.
+      Environment:
+        Variables:
+          AUDIENCE: !Ref Audience
+          AUTHORITY: !Ref Authority
+      Tracing: Active
 Outputs:
   AuthorizerArn:
     Description: The ARN of the authorizer for the specified stage of the specified API.
