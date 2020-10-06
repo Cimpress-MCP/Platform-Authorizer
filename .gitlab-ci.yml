@@ -8,7 +8,6 @@ stages:
 
 variables:
   AWS_DEFAULT_OUTPUT: text
-  AWS_DEFAULT_REGION: us-east-1
   SAM_CLI_TELEMETRY: 0
 
 cache:
@@ -50,8 +49,6 @@ bundle:
 bucket:
   image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
   stage: bundle
-  variables:
-    AWS_DEFAULT_REGION: eu-west-1
   script:
   - export BUCKET="$(aws cloudformation list-exports --query "Exports[?Name=='DeploymentBucket'].Value")"
   - echo "BUCKET=${BUCKET}" >>./bucket.env
@@ -73,6 +70,8 @@ package:
 
 deploy:
   stage: deploy
+  variables:
+    AWS_DEFAULT_REGION: us-east-1
   script:
   - sam publish --template ./template.out.yaml
   only:
