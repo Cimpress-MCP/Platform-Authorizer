@@ -70,9 +70,10 @@ package:
 
 deploy:
   stage: deploy
-  variables:
-    AWS_DEFAULT_REGION: us-east-1
   script:
-  - sam publish --template ./template.out.yaml
+  - >-
+    sam publish
+    --region us-east-1
+    --template ./template.out.yaml
   only:
   - main
