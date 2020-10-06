@@ -1,5 +1,5 @@
 /**
- * @copyright 2018 Cimpress, Inc.
+ * @copyright 2018–2020 Cimpress, Inc.
  * @license Apache-2.0
  */
 
@@ -13,12 +13,6 @@ module.exports = {
   mode: 'development',
   module: {
     rules: [
-      {
-        enforce: 'pre',
-        test: /\.js$/,
-        loader: 'eslint-loader',
-        exclude: /node_modules/
-      },
       {
         test: /\.js$/,
         loader: 'babel-loader',

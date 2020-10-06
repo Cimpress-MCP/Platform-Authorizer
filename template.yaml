@@ -1,7 +1,10 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
+
 Transform: AWS::Serverless-2016-10-31
+
 Description: An authentication lambda function for the Cimpress Mass Customization Platform.
+
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: platform-authorizer
@@ -18,8 +21,9 @@ Metadata:
     - lambda
     - authorizer
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
-    SemanticVersion: 2.1.0
+    SemanticVersion: 2.2.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
+
 Parameters:
   Audience:
     Description: The audience which this service is a member of, authenticationally.
@@ -31,19 +35,41 @@ Parameters:
     Default: https://cimpress.auth0.com/
     AllowedPattern: ^https:\/\/.+
     ConstraintDescription: Authority must be an HTTPS URL.
+  KmsKeyArn:
+    Type: String
+    Description: The KMS key used to encrypt the application.
+    Default: ''
+
+Conditions:
+  KmsKeyArnExists: !Not [ !Equals [ '', !Ref KmsKeyArn ] ]
+
 Resources:
   Authorizer:
     Type: AWS::Serverless::Function
     Properties:
       Handler: authorizer.default
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       CodeUri: ./dist
       Description: An API Gateway Lambda Authorizer.
+      KmsKeyArn: !If
+      - KmsKeyArnExists
+      - !Ref KmsKeyArn
+      - !Ref AWS::NoValue
       Environment:
         Variables:
           AUDIENCE: !Ref Audience
           AUTHORITY: !Ref Authority
       Tracing: Active
+      Policies:
+      - !If
+        - KmsKeyArnExists
+        - Version: 2012-10-17
+          Statement:
+            Effect: Allow
+            Action: kms:Decrypt
+            Resource: !Ref KmsKeyArn
+        - !Ref AWS::NoValue
+
 Outputs:
   AuthorizerArn:
     Description: The ARN of the authorizer for the specified stage of the specified API.

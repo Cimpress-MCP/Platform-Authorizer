@@ -5,10 +5,8 @@
  * @license Apache-2.0
  */
 
-'use strict'
-
 import { callbackify, promisify } from 'util'
-import JwksClient from 'jwks-rsa'
+import createJwksClient from 'jwks-rsa'
 import { URL } from 'url'
 import { verify } from 'jsonwebtoken'
 
@@ -17,15 +15,14 @@ const MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authori
 const UNAUTHORIZED = 'Unauthorized'
 
 const jwksUri = new URL('/.well-known/jwks.json', AUTHORITY).href
-const client = JwksClient({
+const client = createJwksClient({
   'cache': true,
   jwksUri,
   'rateLimit': true
 })
 
-const getSigningKeyAsync = promisify(client.getSigningKey.bind(client))
 const verifyAsync = promisify(verify)
-const getPublicKey = callbackify(({ kid }) => getSigningKeyAsync(kid)
+const getPublicKey = callbackify(({ kid }) => client.getSigningKeyAsync(kid)
   .then(({ publicKey, rsaPublicKey }) => publicKey || rsaPublicKey))
 
 /**

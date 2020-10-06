@@ -1,3 +1,8 @@
+## Version 2.2.0 (Released 2020-10-06)
+
+- The authorizer's runtime has been updated to Node 12.
+- The application optionally accepts the ARN of a KMS key with which to encrypt Lambda Function environment variables.
+
 ## Version 2.1.0 (Released 2019-05-15)
 
 - The authorizer's runtime has been updated to Node 10.

@@ -1,10 +1,15 @@
-image: lambci/lambda:build-nodejs10.x
+image: lambci/lambda:build-nodejs12.x
 
 stages:
 - test
 - bundle
 - package
 - deploy
+
+variables:
+  AWS_DEFAULT_OUTPUT: text
+  AWS_DEFAULT_REGION: us-east-1
+  SAM_CLI_TELEMETRY: 0
 
 cache:
   key: "$CI_PIPELINE_ID"
@@ -16,19 +21,23 @@ test-code:
   before_script:
   - npm ci
   script:
-  - npm run test
+  - npm run test -- --ci --testResultsProcessor="jest-junit"
   artifacts:
     paths:
     - ./node_modules/
+    reports:
+      junit: ./junit.xml
 
 test-template:
   stage: test
   before_script:
-  - pip install cfn-lint
-  - pip install --upgrade aws-sam-translator
+  - pip install --quiet cfn-lint
   script:
   - sam validate
-  - cfn-lint --template ./template.yaml
+  - cfn-lint --template ./template.yml  --format junit > ./template.cfn-lint.xml
+  artifacts:
+    reports:
+      junit: ./template.cfn-lint.xml
 
 bundle:
   stage: bundle
@@ -38,20 +47,33 @@ bundle:
     paths:
     - ./dist/
 
+bucket:
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  stage: bundle
+  variables:
+    AWS_DEFAULT_REGION: eu-west-1
+  script:
+  - export BUCKET="$(aws cloudformation list-exports --query "Exports[?Name=='DeploymentBucket'].Value")"
+  - echo "BUCKET=${BUCKET}" >>./bucket.env
+  artifacts:
+    reports:
+      dotenv: ./bucket.env
+
 package:
   stage: package
   script:
-  - sam package
-    --s3-bucket 'deployment-artifacts-eu-west-1-820870426321'
-    --s3-prefix 'platform-authorizer'
-    --output-template-file ./packaged.yaml
+  - >-
+    sam package
+    --s3-bucket "${BUCKET}"
+    --s3-prefix "${CI_PROJECT_NAME}"
+    --output-template-file ./template.out.yaml
   artifacts:
     paths:
-    - ./packaged.yaml
+    - ./template.out.yaml
 
 deploy:
   stage: deploy
   script:
-  - sam publish --template ./packaged.yaml
+  - sam publish --template ./template.out.yaml
   only:
-  - master
+  - main
