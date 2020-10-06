@@ -34,7 +34,7 @@ test-template:
   - pip install --quiet cfn-lint
   script:
   - sam validate
-  - cfn-lint --template ./template.yml  --format junit > ./template.cfn-lint.xml
+  - cfn-lint --template ./template.yaml --format junit > ./template.cfn-lint.xml
   artifacts:
     reports:
       junit: ./template.cfn-lint.xml
