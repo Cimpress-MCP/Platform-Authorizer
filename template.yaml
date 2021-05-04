@@ -21,7 +21,7 @@ Metadata:
     - lambda
     - authorizer
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
-    SemanticVersion: 2.2.0
+    SemanticVersion: 2.3.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
 
 Parameters:
@@ -44,33 +44,40 @@ Conditions:
   KmsKeyArnExists: !Not [ !Equals [ '', !Ref KmsKeyArn ] ]
 
 Resources:
+  EnvironmentVariablesDecyptionPolicy:
+    Type: AWS::IAM::Policy
+    Condition: KmsKeyArnExists
+    Properties:
+      PolicyName: DecryptEnvironmentVariables
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Action: kms:Decrypt
+          Resource: !Ref KmsKeyArn
+          Condition:
+            StringEquals:
+              kms:ViaService: !Sub lambda.${AWS::Region}.${AWS::URLSuffix}
+            ForAnyValue:ArnEquals:
+              kms:EncryptionContext:aws:lambda:FunctionArn:
+              - !GetAtt Authorizer.Arn
+      Roles: # note(cosborn) Attach in this direction to break circular dependency.
+      - !Ref AuthorizerRole
   Authorizer:
     Type: AWS::Serverless::Function
     Properties:
       Handler: authorizer.default
-      Runtime: nodejs12.x
+      Runtime: nodejs14.x
       CodeUri: ./dist
+      Tracing: Active
       Description: An API Gateway Lambda Authorizer.
-      KmsKeyArn: !If
-      - KmsKeyArnExists
-      - !Ref KmsKeyArn
-      - !Ref AWS::NoValue
+      KmsKeyArn: !If [ KmsKeyArnExists, !Ref KmsKeyArn, !Ref AWS::NoValue ]
       Environment:
         Variables:
           AUDIENCE: !Ref Audience
           AUTHORITY: !Ref Authority
-      Tracing: Active
-      Policies:
-      - !If
-        - KmsKeyArnExists
-        - Version: 2012-10-17
-          Statement:
-            Effect: Allow
-            Action: kms:Decrypt
-            Resource: !Ref KmsKeyArn
-        - !Ref AWS::NoValue
 
 Outputs:
   AuthorizerArn:
-    Description: The ARN of the authorizer for the specified stage of the specified API.
+    Description: The ARN of the authorizer Function to be applied to API Gateway endpoints.
     Value: !GetAtt Authorizer.Arn

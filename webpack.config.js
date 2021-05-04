@@ -1,12 +1,9 @@
 /**
- * @copyright 2018–2020 Cimpress, Inc.
+ * @copyright 2018–2021 Cimpress plc
  * @license Apache-2.0
  */
 
 'use strict'
-
-const MinifyPlugin = require('babel-minify-webpack-plugin')
-const { join } = require('path')
 
 module.exports = {
   entry: { authorizer: './authorizer.js' },
@@ -21,11 +18,10 @@ module.exports = {
     ]
   },
   output: {
-    libraryTarget: 'commonjs2',
-    path: join(__dirname, 'dist'),
-    filename: '[name].js'
+    library: {
+      type: 'commonjs2'
+    }
   },
-  plugins: [ new MinifyPlugin() ],
   stats: 'errors-only',
   target: 'node'
 }
