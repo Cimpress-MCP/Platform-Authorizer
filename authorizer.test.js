@@ -1,7 +1,7 @@
 /* eslint-env jest */
 
 /**
- * @copyright 2018 Cimpress, Inc.
+ * @copyright 2018–2021 Cimpress plc
  * @license Apache-2.0
  */
 

@@ -1,5 +1,3 @@
-image: lambci/lambda:build-nodejs12.x
-
 stages:
 - test
 - bundle
@@ -14,6 +12,7 @@ cache:
   key: "$CI_PIPELINE_ID"
 
 test-code:
+  image: node:14-alpine
   stage: test
   variables:
     AUTHORITY: https://cimpress.auth0.com/
@@ -28,6 +27,7 @@ test-code:
       junit: ./junit.xml
 
 test-template:
+  image: lambci/lambda:build-provided.al2
   stage: test
   before_script:
   - pip install --quiet cfn-lint
@@ -39,6 +39,7 @@ test-template:
       junit: ./template.cfn-lint.xml
 
 bundle:
+  image: node:14-alpine
   stage: bundle
   script:
   - npm run bundle -- --mode=production
@@ -57,23 +58,21 @@ bucket:
       dotenv: ./bucket.env
 
 package:
+  image: lambci/lambda:build-provided.al2
   stage: package
   script:
   - >-
     sam package
     --s3-bucket "${BUCKET}"
     --s3-prefix "${CI_PROJECT_NAME}"
-    --output-template-file ./template.out.yaml
   artifacts:
     paths:
     - ./template.out.yaml
 
 deploy:
+  image: lambci/lambda:build-provided.al2
   stage: deploy
   script:
-  - >-
-    sam publish
-    --region us-east-1
-    --template ./template.out.yaml
+  - sam publish
   only:
   - main

@@ -15,7 +15,9 @@
       ".editorconfig": true,
       ".gitignore": true,
       ".gitattributes": true,
-      ".gitlab-ci.yml": true
+      ".gitlab-ci.yml": true,
+      "junit.xml": true,
+      "template.out.yaml": true
     }
   }
 }

@@ -1,0 +1,8 @@
+version=0.1
+[default.package.parameters]
+output_template_file = "./template.out.yaml"
+
+[default.publish.parameters]
+# Serverless Application Repository must be published to us-east-1.
+region = "us-east-1"
+template = "./template.out.yaml"

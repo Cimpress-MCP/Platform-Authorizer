@@ -1,5 +1,5 @@
 {
   "type": "TOKEN",
-  "authorizationToken": "Bearer <token value>",
-  "methodArn": "arn:aws:execute-api:us-east-1:123456789012:/prod/POST/{proxy+}"
+  "authorizationToken": "Bearer <token>",
+  "methodArn": "arn:aws:execute-api:us-east-1:123456789012:/Prod/POST/{proxy+}"
 }

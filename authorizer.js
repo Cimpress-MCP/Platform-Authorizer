@@ -1,12 +1,12 @@
 /**
- * An authorization lambda function for the Cimpress Mass Customization Platform.
+ * An authorization Lambda Function for the Cimpress Mass Customization Platform.
  *
- * @copyright 2018 Cimpress, Inc.
+ * @copyright 2018–2021 Cimpress plc
  * @license Apache-2.0
  */
 
 import { callbackify, promisify } from 'util'
-import createJwksClient from 'jwks-rsa'
+import { JwksClient } from 'jwks-rsa'
 import { URL } from 'url'
 import { verify } from 'jsonwebtoken'
 
@@ -15,15 +15,16 @@ const MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authori
 const UNAUTHORIZED = 'Unauthorized'
 
 const jwksUri = new URL('/.well-known/jwks.json', AUTHORITY).href
-const client = createJwksClient({
+const client = new JwksClient({
   'cache': true,
   jwksUri,
   'rateLimit': true
 })
 
 const verifyAsync = promisify(verify)
-const getPublicKey = callbackify(({ kid }) => client.getSigningKeyAsync(kid)
-  .then(({ publicKey, rsaPublicKey }) => publicKey || rsaPublicKey))
+const getPublicKey = callbackify(({ kid }) => client
+  .getSigningKey(kid)
+  .then(s => s.getPublicKey()))
 
 /**
  * An Amazon Resource Name.
@@ -64,6 +65,7 @@ const getPublicKey = callbackify(({ kid }) => client.getSigningKeyAsync(kid)
  * @property {Object} context Any additional data associated with the response.
  * @property {!PolicyDocument} policyDocument The policy associated with the desired resource.
  * @property {!String} principalId The unique identifier of the authorized entity.
+ * @property {!String} usageIdentifierKey The identifier of the authorized entity a usage plan.
  */
 
 /**
@@ -74,18 +76,18 @@ const getPublicKey = callbackify(({ kid }) => client.getSigningKeyAsync(kid)
  *   A promise which, when resolved, signals the result of authorization.
  */
 export default async function ({ 'authorizationToken': token, 'methodArn': arn, 'type': eventType }) {
-  // BECAUSE(cosborn) Fail-fast configuration check.
+  // because(cosborn) Fail-fast configuration check.
   if (eventType !== 'TOKEN') {
     throw MISCONFIGURATION
   }
 
-  // BECAUSE(cosborn) The configuration of the authorizer should handle this but let's fail fast
+  // because(cosborn) The configuration of the authorizer should handle this but let's fail fast
   if (!token) {
     throw UNAUTHORIZED
   }
 
-  // NOTE(cosborn) Should also be handled by config.
-  const { 'groups': { jwt } = {} } = token.match(/^Bearer +(?<jwt>.*)$/u) || {}
+  // note(cosborn) Should also be handled by config.
+  const { 'groups': { jwt = null } = {} } = token.match(/^Bearer +(?<jwt>.*)$/u) || {}
 
   try {
     const { 'sub': principalId, scope } = await verifyAsync(jwt, getPublicKey, {
@@ -95,7 +97,8 @@ export default async function ({ 'authorizationToken': token, 'methodArn': arn, 
     return {
       'context': { scope },
       'policyDocument': createPolicyDocument(arn),
-      principalId
+      principalId,
+      'usageIdentifierKey': principalId
     }
   } catch (err) {
     console.log('An error occurred validating the token.', { err, jwksUri })
@@ -111,7 +114,7 @@ export default async function ({ 'authorizationToken': token, 'methodArn': arn, 
  * @returns {!PolicyDocument} A policy document.
  */
 export const createPolicyDocument = (arn) => {
-  // NOTE(cosborn) Everything after stage is discarded.
+  // note(cosborn) Everything after stage is discarded.
   const [
     api,
     stage
@@ -121,7 +124,7 @@ export const createPolicyDocument = (arn) => {
       {
         'Action': 'execute-api:Invoke',
         'Effect': 'Allow',
-        // NOTE(cosborn) Tokens are valid for the whole stage, so this doesn't need to be restrictive.
+        // note(cosborn) Tokens are valid for the whole stage, so this doesn't need to be restrictive.
         'Resource': `${api}/${stage}/*`
       }
     ],
