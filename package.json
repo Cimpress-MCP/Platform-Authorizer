@@ -8,7 +8,7 @@
     "name": "Fulfiller Enablement"
   },
   "engines": {
-    "node": ">=14.16"
+    "node": ">=14.18"
   },
   "scripts": {
     "bundle": "webpack",
@@ -17,7 +17,7 @@
   "eslintConfig": {
     "root": true,
     "extends": [
-      "eslint:recommended",
+      "eslint:all",
       "plugin:import/errors",
       "plugin:import/warnings",
       "plugin:promise/recommended"
@@ -50,7 +50,7 @@
         "@babel/preset-env",
         {
           "targets": {
-            "node": "14.16"
+            "node": "14.18"
           }
         }
       ]
@@ -60,20 +60,18 @@
     "testEnvironment": "node"
   },
   "dependencies": {
-    "jsonwebtoken": "^8.5.0",
-    "jwks-rsa": "^2.0.0"
+    "aws-jwt-verify": "^1.0.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.14.0",
-    "@babel/preset-env": "^7.14.0",
-    "babel-loader": "^8.2.0",
-    "babel-minify-webpack-plugin": "^0.3.1",
-    "eslint": "^7.25.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-promise": "^5.1.0",
-    "jest": "^26.6.0",
-    "jest-junit": "^12.0.0",
-    "webpack": "^5.36.0",
-    "webpack-cli": "^4.6.0"
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.0",
+    "babel-loader": "^8.2.3",
+    "eslint": "^8.1.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-promise": "^5.1.1",
+    "jest": "^27.3.1",
+    "jest-junit": "^13.0.0",
+    "webpack": "^5.61.0",
+    "webpack-cli": "^4.9.1"
   }
 }

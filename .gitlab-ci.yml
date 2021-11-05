@@ -8,11 +8,15 @@ variables:
   AWS_DEFAULT_OUTPUT: text
   SAM_CLI_TELEMETRY: 0
 
-cache:
-  key: "$CI_PIPELINE_ID"
+.cache_template:
+  cache:
+    key: ${CI_PIPELINE_ID}
+    paths:
+    - ./node_modules/
 
 test-code:
-  image: node:14-alpine
+  extends: .cache_template
+  image: public.ecr.aws/sam/build-nodejs14.x
   stage: test
   variables:
     AUTHORITY: https://cimpress.auth0.com/
@@ -20,14 +24,14 @@ test-code:
   - npm ci
   script:
   - npm run test -- --ci --testResultsProcessor="jest-junit"
+  cache:
+    policy: push
   artifacts:
-    paths:
-    - ./node_modules/
     reports:
       junit: ./junit.xml
 
 test-template:
-  image: lambci/lambda:build-provided.al2
+  image: public.ecr.aws/sam/build-provided.al2
   stage: test
   before_script:
   - pip install --quiet cfn-lint
@@ -39,16 +43,19 @@ test-template:
       junit: ./template.cfn-lint.xml
 
 bundle:
-  image: node:14-alpine
+  extends: .cache_template
+  image: public.ecr.aws/sam/build-nodejs14.x
   stage: bundle
   script:
   - npm run bundle -- --mode=production
+  cache:
+    policy: pull
   artifacts:
     paths:
     - ./dist/
 
 bucket:
-  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base
   stage: bundle
   script:
   - export BUCKET="$(aws cloudformation list-exports --query "Exports[?Name=='DeploymentBucket'].Value")"
@@ -58,7 +65,7 @@ bucket:
       dotenv: ./bucket.env
 
 package:
-  image: lambci/lambda:build-provided.al2
+  image: public.ecr.aws/sam/build-provided.al2
   stage: package
   script:
   - >-
@@ -70,9 +77,9 @@ package:
     - ./template.out.yaml
 
 deploy:
-  image: lambci/lambda:build-provided.al2
+  image: public.ecr.aws/sam/build-provided.al2
   stage: deploy
   script:
   - sam publish
-  only:
-  - main
+  rules:
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
