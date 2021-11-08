@@ -5,26 +5,46 @@
  * @license Apache-2.0
  */
 
-import { callbackify, promisify } from 'util'
-import { JwksClient } from 'jwks-rsa'
-import { URL } from 'url'
-import { verify } from 'jsonwebtoken'
+import {JwtRsaVerifier} from "aws-jwt-verify";
 
-const { AUDIENCE, AUTHORITY } = process.env
-const MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authorizer."
-const UNAUTHORIZED = 'Unauthorized'
+const {AUDIENCE, AUTHORITY} = process.env,
+    MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authorizer.",
+    UNAUTHORIZED = "Unauthorized",
 
-const jwksUri = new URL('/.well-known/jwks.json', AUTHORITY).href
-const client = new JwksClient({
-  'cache': true,
-  jwksUri,
-  'rateLimit': true
-})
+    client = JwtRsaVerifier.create({
+        "audience": AUDIENCE,
+        "issuer": AUTHORITY
+    });
 
-const verifyAsync = promisify(verify)
-const getPublicKey = callbackify(({ kid }) => client
-  .getSigningKey(kid)
-  .then(s => s.getPublicKey()))
+/**
+ * Transforms an 'execute-api' resource into a policy document indicating
+ * authorization to invoke any endpoint in the current stage of the API.
+ *
+ * @param {!ARN} arn The ARN of the 'execute-api' permission sought.
+ * @returns {!PolicyDocument} A policy document.
+ */
+// eslint-disable-next-line one-var
+export const createPolicyDocument = (arn) => {
+
+    // NOTE(cosborn) Everything after stage is discarded.
+    const [
+        api,
+        stage
+    ] = arn.split("/");
+    return {
+        "Statement": [
+            {
+                "Action": "execute-api:Invoke",
+                "Effect": "Allow",
+                // NOTE(cosborn) Tokens are valid for the whole stage, so this doesn't need to be restrictive.
+                "Resource": `${api}/${stage}/*`
+            }
+        ],
+        "Version": "2012-10-17"
+    };
+
+};
+
 
 /**
  * An Amazon Resource Name.
@@ -75,59 +95,47 @@ const getPublicKey = callbackify(({ kid }) => client
  * @returns {!Promise.<!ApiGatewayAuthorizationResponse>}
  *   A promise which, when resolved, signals the result of authorization.
  */
-export default async function ({ 'authorizationToken': token, 'methodArn': arn, 'type': eventType }) {
-  // because(cosborn) Fail-fast configuration check.
-  if (eventType !== 'TOKEN') {
-    throw MISCONFIGURATION
-  }
+export default async function authorize ({"authorizationToken": token, "methodArn": arn, "type": eventType}) {
 
-  // because(cosborn) The configuration of the authorizer should handle this but let's fail fast
-  if (!token) {
-    throw UNAUTHORIZED
-  }
+    // BECAUSE(cosborn) Fail-fast configuration check.
+    if (eventType !== "TOKEN") {
 
-  // note(cosborn) Should also be handled by config.
-  const { 'groups': { jwt = null } = {} } = token.match(/^Bearer +(?<jwt>.*)$/u) || {}
+        throw MISCONFIGURATION;
 
-  try {
-    const { 'sub': principalId, scope } = await verifyAsync(jwt, getPublicKey, {
-      'audience': AUDIENCE,
-      'issuer': AUTHORITY
-    })
-    return {
-      'context': { scope },
-      'policyDocument': createPolicyDocument(arn),
-      principalId,
-      'usageIdentifierKey': principalId
     }
-  } catch (err) {
-    console.log('An error occurred validating the token.', { err, jwksUri })
-    throw UNAUTHORIZED
-  }
-}
 
-/**
- * Transforms an 'execute-api' resource into a policy document indicating
- * authorization to invoke any endpoint in the current stage of the API.
- *
- * @param {!ARN} arn The ARN of the 'execute-api' permission sought.
- * @returns {!PolicyDocument} A policy document.
- */
-export const createPolicyDocument = (arn) => {
-  // note(cosborn) Everything after stage is discarded.
-  const [
-    api,
-    stage
-  ] = arn.split('/', 2)
-  return {
-    'Statement': [
-      {
-        'Action': 'execute-api:Invoke',
-        'Effect': 'Allow',
-        // note(cosborn) Tokens are valid for the whole stage, so this doesn't need to be restrictive.
-        'Resource': `${api}/${stage}/*`
-      }
-    ],
-    'Version': '2012-10-17'
-  }
+    // BECAUSE(cosborn) The configuration of the authorizer should handle this but let's fail fast
+    if (!token) {
+
+        throw UNAUTHORIZED;
+
+    }
+
+    // NOTE(cosborn) Should also be handled by config.
+    const {"groups": {jwt} = {}} = token.match(/^Bearer +(?<jwt>.*)$/u) || {};
+
+    try {
+
+        const {"sub": principalId, scope} = await client.verify(jwt);
+        return {
+            "context": {scope},
+            "policyDocument": createPolicyDocument(arn),
+            principalId,
+            "usageIdentifierKey": principalId
+        };
+
+    } catch (err) {
+
+        console.log(
+            "An error occurred validating the token.",
+            {
+                AUDIENCE,
+                AUTHORITY,
+                err
+            }
+        );
+        throw new Error(UNAUTHORIZED);
+
+    }
+
 }

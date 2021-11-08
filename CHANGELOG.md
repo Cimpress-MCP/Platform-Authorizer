@@ -1,3 +1,13 @@
+## version 3.0.0 (Released 2021-11-07)
+
+- The authorizer's deployment size has been significantly reduced due to new depdendencies.
+- The `sub` of the JWT is supplied as the `usageIdentifierKey` for rate-limiting and other purposes.
+- The conditions of the permissions to decrypt environment variables (if environment variables are encrypted) conforms to new AWS advice.
+
+## Version 2.3.0 (Released 2020-??-??)
+
+- The authorizer's runtime has been updated to Node 14.
+
 ## Version 2.2.0 (Released 2020-10-06)
 
 - The authorizer's runtime has been updated to Node 12.

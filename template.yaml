@@ -21,12 +21,12 @@ Metadata:
     - lambda
     - authorizer
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
-    SemanticVersion: 2.3.0
+    SemanticVersion: 3.0.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
 
 Parameters:
   Audience:
-    Description: The audience which this service is a member of, authenticationally.
+    Description: The audience which the service behind this authorizer is a member of, authenticationally.
     Type: String
     Default: https://api.cimpress.io/
   Authority:
@@ -58,9 +58,8 @@ Resources:
           Condition:
             StringEquals:
               kms:ViaService: !Sub lambda.${AWS::Region}.${AWS::URLSuffix}
-            ForAnyValue:ArnEquals:
-              kms:EncryptionContext:aws:lambda:FunctionArn:
-              - !GetAtt Authorizer.Arn
+            ArnEquals:
+              kms:EncryptionContext:aws:lambda:FunctionArn: !GetAtt Authorizer.Arn
       Roles: # note(cosborn) Attach in this direction to break circular dependency.
       - !Ref AuthorizerRole
   Authorizer:
