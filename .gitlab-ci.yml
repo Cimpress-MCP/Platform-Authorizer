@@ -6,6 +6,8 @@ stages:
 
 variables:
   AWS_DEFAULT_OUTPUT: text
+  AWS_DEFAULT_REGION: eu-west-1
+  AWS_REGION: eu-west-1
   SAM_CLI_TELEMETRY: 0
 
 .cache_template:
@@ -77,14 +79,19 @@ package:
     sam package
     --s3-bucket "${BUCKET}"
     --s3-prefix "${CI_PROJECT_NAME}"
+    >./template.out.yml
   artifacts:
     paths:
-    - ./template.out.yaml
+    - ./template.out.yml
 
 deploy:
   image: public.ecr.aws/sam/build-provided.al2
   stage: deploy
+  variables:
+    # This component publishes to us-east-1.
+    AWS_DEFAULT_REGION: us-east-1
+    AWS_REGION: us-east-1
   script:
-  - sam publish
+  - sam publish --template-file ./template.out.yml
   rules:
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
