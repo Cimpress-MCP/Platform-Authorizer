@@ -1,20 +1,23 @@
 /**
  * An authorization Lambda Function for the Cimpress Mass Customization Platform.
  *
- * @copyright 2018–2021 Cimpress plc
+ * @copyright 2018–2023 Cimpress plc
  * @license Apache-2.0
  */
 
 import {JwtRsaVerifier} from "aws-jwt-verify";
 
-const {AUDIENCE, AUTHORITY} = process.env,
-    MISCONFIGURATION = "This authorizer is not configured as a 'TOKEN' authorizer.",
+const {AUDIENCE, ISSUERS} = process.env,
+    NOT_TOKEN = "This authorizer is not configured as a 'TOKEN' authorizer.",
     UNAUTHORIZED = "Unauthorized",
 
-    client = JwtRsaVerifier.create({
-        "audience": AUDIENCE,
-        "issuer": AUTHORITY
-    });
+    issuers = ISSUERS.split(/,\s*/u);
+
+// eslint-disable-next-line one-var
+const client = JwtRsaVerifier.create(issuers.map((iss) => ({
+    "audience": AUDIENCE,
+    "issuer": iss
+})));
 
 /**
  * Transforms an 'execute-api' resource into a policy document indicating
@@ -100,7 +103,7 @@ export default async function authorize ({"authorizationToken": token, "methodAr
     // BECAUSE(cosborn) Fail-fast configuration check.
     if (eventType !== "TOKEN") {
 
-        throw MISCONFIGURATION;
+        throw NOT_TOKEN;
 
     }
 
@@ -130,7 +133,7 @@ export default async function authorize ({"authorizationToken": token, "methodAr
             "An error occurred validating the token.",
             {
                 AUDIENCE,
-                AUTHORITY,
+                ISSUERS,
                 err
             }
         );

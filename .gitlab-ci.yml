@@ -16,14 +16,19 @@ variables:
 
 test-code:
   extends: .cache_template
-  image: public.ecr.aws/sam/build-nodejs14.x
+  image: public.ecr.aws/sam/build-nodejs18.x
   stage: test
-  variables:
-    AUTHORITY: https://cimpress.auth0.com/
+  parallel:
+    matrix:
+    - AUDIENCE: https://api.cimpress.io/
+      ISSUERS:
+      - https://auth0.cimpress.io/
+      - https://cimpress.auth0.com/,https://auth0.cimpress.io/
+      - https://cimpress.auth0.com/, https://auth0.cimpress.io/
   before_script:
   - npm ci
   script:
-  - npm run test -- --ci --testResultsProcessor="jest-junit"
+  - npm run test -- --ci --testResultsProcessor='jest-junit'
   cache:
     policy: push
   artifacts:
@@ -44,7 +49,7 @@ test-template:
 
 bundle:
   extends: .cache_template
-  image: public.ecr.aws/sam/build-nodejs14.x
+  image: public.ecr.aws/sam/build-nodejs18.x
   stage: bundle
   script:
   - npm run bundle -- --mode=production
