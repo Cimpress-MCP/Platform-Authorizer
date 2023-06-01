@@ -1,7 +1,8 @@
 ## Version 4.0.0 (Released 2023-??-??)
 
 - The authorizer's runtime has been updated to Node 18.
-- The authorizer now supports multiple audience–issuer pairs.
+- BREAKING: The authorizer now supports multiple issuers.
+  - These are called ISSUERS now, deprecating AUTHORITY.
 
 ## Version 3.0.0 (Released 2021-11-07)
 
