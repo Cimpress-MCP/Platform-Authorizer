@@ -6,6 +6,8 @@ stages:
 
 variables:
   AWS_DEFAULT_OUTPUT: text
+  AWS_DEFAULT_REGION: eu-west-1
+  AWS_REGION: eu-west-1
   SAM_CLI_TELEMETRY: 0
 
 .cache_template:
@@ -16,14 +18,19 @@ variables:
 
 test-code:
   extends: .cache_template
-  image: public.ecr.aws/sam/build-nodejs14.x
+  image: public.ecr.aws/sam/build-nodejs18.x
   stage: test
-  variables:
-    AUTHORITY: https://cimpress.auth0.com/
+  parallel:
+    matrix:
+    - AUDIENCE: https://api.cimpress.io/
+      ISSUERS:
+      - https://auth0.cimpress.io/
+      - https://cimpress.auth0.com/,https://auth0.cimpress.io/
+      - https://cimpress.auth0.com/, https://auth0.cimpress.io/
   before_script:
   - npm ci
   script:
-  - npm run test -- --ci --testResultsProcessor="jest-junit"
+  - npm run test -- --ci --testResultsProcessor='jest-junit'
   cache:
     policy: push
   artifacts:
@@ -44,7 +51,7 @@ test-template:
 
 bundle:
   extends: .cache_template
-  image: public.ecr.aws/sam/build-nodejs14.x
+  image: public.ecr.aws/sam/build-nodejs18.x
   stage: bundle
   script:
   - npm run bundle -- --mode=production
@@ -72,14 +79,19 @@ package:
     sam package
     --s3-bucket "${BUCKET}"
     --s3-prefix "${CI_PROJECT_NAME}"
+    >./template.out.yml
   artifacts:
     paths:
-    - ./template.out.yaml
+    - ./template.out.yml
 
 deploy:
   image: public.ecr.aws/sam/build-provided.al2
   stage: deploy
+  variables:
+    # This component publishes to us-east-1.
+    AWS_DEFAULT_REGION: us-east-1
+    AWS_REGION: us-east-1
   script:
-  - sam publish
+  - sam publish --template-file ./template.out.yml
   rules:
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

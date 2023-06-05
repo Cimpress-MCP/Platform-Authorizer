@@ -21,20 +21,21 @@ Metadata:
     - lambda
     - authorizer
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
-    SemanticVersion: 3.0.0
+    SemanticVersion: 4.0.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
 
 Parameters:
   Audience:
-    Description: The audience which the service behind this authorizer is a member of, authenticationally.
+    Description: >-
+      The audience which the service behind this authorizer is a member of, authenticationally.
     Type: String
     Default: https://api.cimpress.io/
-  Authority:
-    Description: The source of tokens and the issuer of claims.
-    Type: String
-    Default: https://cimpress.auth0.com/
-    AllowedPattern: ^https:\/\/.+
-    ConstraintDescription: Authority must be an HTTPS URL.
+  Issuers:
+    Description: The sources of tokens and the issuers of claims.
+    Type: CommaDelimitedList
+    AllowedPattern: ^https:\/\/.+(,\s*https:\/\/.+)*$
+    ConstraintDescription: Issuers must be HTTPS URLs.
+    Default: https://cimpress.auth0.com/,https://auth0.cimpress.io/
   KmsKeyArn:
     Type: String
     Description: The KMS key used to encrypt the application.
@@ -65,8 +66,8 @@ Resources:
   Authorizer:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: authorizer.default
-      Runtime: nodejs14.x
+      Handler: main.default
+      Runtime: nodejs18.x
       CodeUri: ./dist
       Tracing: Active
       Description: An API Gateway Lambda Authorizer.
@@ -74,7 +75,7 @@ Resources:
       Environment:
         Variables:
           AUDIENCE: !Ref Audience
-          AUTHORITY: !Ref Authority
+          ISSUERS: !Ref Issuers
 
 Outputs:
   AuthorizerArn:

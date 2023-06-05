@@ -1,24 +1,16 @@
 /**
- * @copyright 2018–2021 Cimpress plc
+ * @copyright 2018–2023 Cimpress plc
  * @license Apache-2.0
  */
 
-module.exports = {
-    "entry": {"authorizer": "./authorizer.js"},
-    "mode": "development",
-    "module": {
-        "rules": [
-            {
-                "exclude": /node_modules/u,
-                "loader": "babel-loader",
-                "test": /\.js$/u
-            }
-        ]
+export default {
+    "experiments": {
+        "outputModule": true
     },
     "output": {
         "library": {
-            "type": "commonjs2"
+            "type": "module"
         }
     },
-    "target": "node"
+    "target": "node18"
 };
