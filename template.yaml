@@ -75,7 +75,9 @@ Resources:
       Environment:
         Variables:
           AUDIENCE: !Ref Audience
-          ISSUERS: !Ref Issuers
+          ISSUERS: !Join
+          - ','
+          - !Ref Issuers
 
 Outputs:
   AuthorizerArn:
