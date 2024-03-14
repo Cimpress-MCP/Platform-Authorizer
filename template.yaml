@@ -21,7 +21,7 @@ Metadata:
     - lambda
     - authorizer
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
-    SemanticVersion: 4.0.0
+    SemanticVersion: 4.1.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
 
 Parameters:
@@ -45,7 +45,7 @@ Conditions:
   KmsKeyArnExists: !Not [ !Equals [ '', !Ref KmsKeyArn ] ]
 
 Resources:
-  EnvironmentVariablesDecyptionPolicy:
+  EnvironmentVariablesDecryptionPolicy:
     Type: AWS::IAM::Policy
     Condition: KmsKeyArnExists
     Properties:
@@ -66,9 +66,11 @@ Resources:
   Authorizer:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.default
-      Runtime: nodejs18.x
-      CodeUri: ./dist
+      Architectures:
+      - arm64
+      Handler: index.default
+      Runtime: nodejs20.x
+      CodeUri: ./src
       Tracing: Active
       Description: An API Gateway Lambda Authorizer.
       KmsKeyArn: !If [ KmsKeyArnExists, !Ref KmsKeyArn, !Ref AWS::NoValue ]
@@ -78,6 +80,13 @@ Resources:
           ISSUERS: !Join
           - ','
           - !Ref Issuers
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+        - .js=.mjs
+        UseNpmCi: True
 
 Outputs:
   AuthorizerArn:
