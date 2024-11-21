@@ -21,21 +21,21 @@ Metadata:
     - lambda
     - authorizer
     HomePageUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
-    SemanticVersion: 4.0.0
+    SemanticVersion: 4.1.0
     SourceCodeUrl: https://github.com/Cimpress-MCP/Platform-Authorizer
 
 Parameters:
   Audience:
     Description: >-
-      The audience which the service behind this authorizer is a member of, authenticationally.
+      The audience which the service behind this authorizer allows, authenticationally.
     Type: String
     Default: https://api.cimpress.io/
   Issuers:
     Description: The sources of tokens and the issuers of claims.
-    Type: CommaDelimitedList
-    AllowedPattern: ^https:\/\/.+(,\s*https:\/\/.+)*$
-    ConstraintDescription: Issuers must be HTTPS URLs.
-    Default: https://cimpress.auth0.com/,https://auth0.cimpress.io/
+    Type: List<String>
+    AllowedPattern: '^(https:\/\/.+?)(,\1)*$'
+    ConstraintDescription: Issuers must be a comma-delimited collection of HTTPS URLs.
+    Default: https://cimpress.auth0.com/,https://oauth.cimpress.io/
   KmsKeyArn:
     Type: String
     Description: The KMS key used to encrypt the application.
@@ -45,7 +45,7 @@ Conditions:
   KmsKeyArnExists: !Not [ !Equals [ '', !Ref KmsKeyArn ] ]
 
 Resources:
-  EnvironmentVariablesDecyptionPolicy:
+  EnvironmentVariablesDecryptionPolicy:
     Type: AWS::IAM::Policy
     Condition: KmsKeyArnExists
     Properties:
@@ -66,18 +66,25 @@ Resources:
   Authorizer:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.default
-      Runtime: nodejs18.x
-      CodeUri: ./dist
+      Architectures:
+      - arm64
+      Handler: index.default
+      Runtime: nodejs20.x
+      CodeUri: ./src
       Tracing: Active
       Description: An API Gateway Lambda Authorizer.
       KmsKeyArn: !If [ KmsKeyArnExists, !Ref KmsKeyArn, !Ref AWS::NoValue ]
       Environment:
         Variables:
           AUDIENCE: !Ref Audience
-          ISSUERS: !Join
-          - ','
-          - !Ref Issuers
+          ISSUERS: !Join [ ',', !Ref Issuers ]
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+        - .js=.mjs
+        UseNpmCi: True
 
 Outputs:
   AuthorizerArn:

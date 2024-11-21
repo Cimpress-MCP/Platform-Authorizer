@@ -1,6 +1,6 @@
 {
   "Authorizer": {
     "AUDIENCE": "https://api.cimpress.io/",
-    "ISSUERS": "https://cimpress.auth0.com/,https://auth0.cimpress.io/"
+    "ISSUERS": "https://cimpress.auth0.com/,https://oauth.cimpress.io/"
   }
 }

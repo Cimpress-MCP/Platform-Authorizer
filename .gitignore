@@ -3,3 +3,4 @@ dist/
 template.out.yaml
 junit.xml
 **/.DS_Store
+.aws-sam/

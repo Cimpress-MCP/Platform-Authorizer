@@ -7,7 +7,7 @@
 
 import {JwtRsaVerifier} from "aws-jwt-verify";
 
-const {AUDIENCE, ISSUERS} = process.env,
+const {AUDIENCE, ISSUERS = ''} = process.env,
     NOT_TOKEN = "This authorizer is not configured as a 'TOKEN' authorizer.",
     UNAUTHORIZED = "Unauthorized",
 

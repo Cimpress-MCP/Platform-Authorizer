@@ -2,27 +2,24 @@
   "name": "platform-authorizer",
   "license": "Apache-2.0",
   "private": true,
-  "version": "4.0.0",
+  "version": "4.1.0",
   "type": "module",
-  "main": "./src/index.js",
+  "main": "./index.js",
   "description": "A Lambda authorizer for AWS API Gateway for Auth0-integrated services.",
   "author": {
     "email": "fulfillerenablement@cimpress.com",
     "name": "Fulfiller Enablement"
   },
   "engines": {
-    "node": ">=18.13"
+    "node": ">=20.10"
   },
   "scripts": {
-    "bundle": "webpack",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "eslintConfig": {
     "root": true,
     "extends": [
       "eslint:all",
-      "plugin:import/errors",
-      "plugin:import/warnings",
       "plugin:promise/recommended"
     ],
     "parserOptions": {
@@ -54,15 +51,13 @@
     }
   },
   "dependencies": {
-    "aws-jwt-verify": "^4.0.0"
+    "aws-jwt-verify": "^4.0.1"
   },
   "devDependencies": {
-    "eslint": "^8.37.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-promise": "^6.1.1",
-    "jest": "^29.5.0",
-    "jest-junit": "^15.0.0",
-    "webpack": "^5.78.0",
-    "webpack-cli": "^5.0.1"
+    "esbuild": "^0.24.0",
+    "eslint": "^9.15.0",
+    "eslint-plugin-promise": "^7.1.0",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0"
   }
 }
