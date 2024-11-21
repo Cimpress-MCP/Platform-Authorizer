@@ -1,3 +1,8 @@
+## Version 4.1.0 (Released 2024-11-21)
+
+- The authorizer's runtime has been updated to Node 20.
+- The default issuers have been changed.
+
 ## Version 4.0.1 (Released 2023-08-29)
 
 - The authorizer's runtime has been updated to Node 18.

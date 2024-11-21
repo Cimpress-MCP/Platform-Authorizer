@@ -27,15 +27,15 @@ Metadata:
 Parameters:
   Audience:
     Description: >-
-      The audience which the service behind this authorizer is a member of, authenticationally.
+      The audience which the service behind this authorizer allows, authenticationally.
     Type: String
     Default: https://api.cimpress.io/
   Issuers:
     Description: The sources of tokens and the issuers of claims.
-    Type: CommaDelimitedList
-    AllowedPattern: ^https:\/\/.+(,\s*https:\/\/.+)*$
-    ConstraintDescription: Issuers must be HTTPS URLs.
-    Default: https://cimpress.auth0.com/,https://auth0.cimpress.io/
+    Type: List<String>
+    AllowedPattern: '^(https:\/\/.+?)(,\1)*$'
+    ConstraintDescription: Issuers must be a comma-delimited collection of HTTPS URLs.
+    Default: https://cimpress.auth0.com/,https://oauth.cimpress.io/
   KmsKeyArn:
     Type: String
     Description: The KMS key used to encrypt the application.
@@ -77,9 +77,7 @@ Resources:
       Environment:
         Variables:
           AUDIENCE: !Ref Audience
-          ISSUERS: !Join
-          - ','
-          - !Ref Issuers
+          ISSUERS: !Join [ ',', !Ref Issuers ]
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

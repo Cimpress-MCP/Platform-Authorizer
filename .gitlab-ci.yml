@@ -24,9 +24,9 @@ test-code:
     matrix:
     - AUDIENCE: https://api.cimpress.io/
       ISSUERS:
-      - https://auth0.cimpress.io/
-      - https://cimpress.auth0.com/,https://auth0.cimpress.io/
-      - https://cimpress.auth0.com/, https://auth0.cimpress.io/
+      - https://oauth.cimpress.io/
+      - https://cimpress.auth0.com/,https://oauth.cimpress.io/
+      - https://cimpress.auth0.com/, https://oauth.cimpress.io/
   before_script:
   - npm --prefix ./src/ ci
   script:
@@ -38,10 +38,10 @@ test-code:
       junit: ./src/junit.xml
 
 test-template:
-  image: public.ecr.aws/sam/build-provided.al2
+  image: public.ecr.aws/sam/build-provided.al2023
   stage: test
   before_script:
-  - pip install --quiet cfn-lint
+  - pip install --quiet cfn-lint[junit]
   script:
   - sam validate
   - cfn-lint --template ./template.yaml --format junit > ./template.cfn-lint.xml
@@ -72,7 +72,7 @@ bucket:
       dotenv: ./bucket.env
 
 package:
-  image: public.ecr.aws/sam/build-provided.al2
+  image: public.ecr.aws/sam/build-provided.al2023
   stage: package
   script:
   - >-
@@ -85,7 +85,7 @@ package:
     - ./template.out.yml
 
 deploy:
-  image: public.ecr.aws/sam/build-provided.al2
+  image: public.ecr.aws/sam/build-provided.al2023
   stage: deploy
   variables:
     # This component publishes to us-east-1.
